@@ -1,13 +1,23 @@
 <script lang="ts">
   import DemoTemplate from "./lib/DemoTemplate.svelte";
   import Sorter from "./lib/Sorter.svelte";
+
+  interface Data {
+    id: string;
+    value: string;
+    label: string;
+  }
+  const data: Data[] = [
+    { id: "1", value: "tomato", label: "Tomato" },
+    { id: "2", value: "pink", label: "Pink" },
+    { id: "3", value: "aquamarine", label: "Aquamarine" },
+    { id: "4", value: "slateblue", label: "Slateblue" },
+  ];
 </script>
 
 <main>
   <div class="demo-wrapper">
-    <Sorter>
-      <DemoTemplate item={{ value: "blue", label: "blue" }} />
-    </Sorter>
+    <Sorter template={DemoTemplate} {data} />
   </div>
 </main>
 
