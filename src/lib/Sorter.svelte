@@ -21,6 +21,7 @@
   let orderedIds: Array<string | number> = data.map((item) => item[identifier]);
   let draggingIds: Array<string | number> = [];
   let itemRefs: Record<string, HTMLElement> = {};
+  let markerRef: HTMLElement = null;
   let dropOrderId: number = 0;
 
   const dispatch = createEventDispatcher();
@@ -57,14 +58,20 @@
   const handleDrag = (e) => {
     const { clientX, clientY } = e;
     if (clientX === 0 || clientY === 0) return;
-    dropOrderId = unplace([clientX, clientY], templateDimension);
 
-    orderedIds.forEach((id, i) => {
-      const [x, y] = place(i, templateDimension);
-      const itemEl = itemRefs[id];
-      itemEl.style.transform = `translate(${x}px, ${y}px)`;
-    });
+    // calculate potential drop index
+    dropOrderId = unplace([clientX, clientY], templateDimension, [
+      0,
+      orderedIds.length,
+    ]);
 
+    // bring the marker to the potential drop position
+    if (markerRef) {
+      const [x, y] = place(dropOrderId, templateDimension);
+      markerRef.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    // stick items being dragged to the cursor
     draggingIds.forEach((id, i) => {
       const itemEl = itemRefs[id];
       itemEl.style.zIndex = 1000 + i + "";
@@ -72,11 +79,20 @@
         translate(${clientX}px, ${clientY}px)
         rotate(${5 * i}deg)`;
     });
+
+    // move other items around
+    orderedIds.forEach((id, i) => {
+      const [x, y] = place(i, templateDimension);
+      const itemEl = itemRefs[id];
+      itemEl.style.transform = `translate(${x}px, ${y}px)`;
+    });
   };
 
   const handleDrop = (e) => {
     console.log("dropped");
   };
+
+  $: isDragging = draggingIds.length > 0;
 </script>
 
 <div
@@ -100,6 +116,10 @@
     {/each}
   {/if}
 
+  {#if isDragging}
+    <div bind:this={markerRef} class="target-marker" />
+  {/if}
+
   <!-- measure element off-screen -->
   {#if !ready}
     <div class="offscreen-measurer">
@@ -118,5 +138,12 @@
 
   .offscreen-measurer {
     opacity: 0;
+  }
+
+  .target-marker {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background-color: red;
   }
 </style>

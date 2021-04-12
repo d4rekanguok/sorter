@@ -4,9 +4,10 @@ export const place = (i: number, dimension: [number, number], prev?: any): [numb
   return [0, y]
 }
 
-export const unplace = (position: [number, number], dimension: [number, number]): number => {
+export const unplace = (position: [number, number], dimension: [number, number], bound: [number, number]): number => {
   const [x, y] = position
   const [w, h] = dimension
-  const i = Math.floor(y / h)
-  return i
+  const [start, end] = bound
+  const i = Math.round(y / h)
+  return Math.max(start, Math.min(end, i))
 }
