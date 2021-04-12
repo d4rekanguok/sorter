@@ -4,14 +4,16 @@
 </script>
 
 <script lang="ts">
+  import { onMount, createEventDispatcher } from "svelte";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
   import { place as defaultPlace, unplace as defaultUnplace } from "./place";
   import { setDataImage, measureContainer, getDragOffset } from "./domHelpers";
-  import { onMount, createEventDispatcher } from "svelte";
+  import { removeItemsFromArray } from "./removeItems";
 
   import DragWrapper from "./DragWrapper.svelte";
 
   export let data: any[] = [];
+  export let selectedIds: Array<string | number> = [];
   export let template = null;
   export let identifier = "id";
   export let measureTemplateSize = defaultTemplateMeasurer;
@@ -55,9 +57,11 @@
 
     const item = e.target as HTMLElement;
     const order = +item.dataset.order;
-    draggingIds = orderedIds.splice(order, 1);
+
+    const selectedIndexes = selectedIds.map((id) => orderedIds.indexOf(id));
+    const draggingIndexes = [...new Set([order].concat(selectedIndexes))];
+    draggingIds = removeItemsFromArray(orderedIds, draggingIndexes);
     orderedIds = [...orderedIds];
-    draggingIds = [...draggingIds];
   };
 
   const handleDragEnd = () => {
@@ -94,7 +98,7 @@
     draggingIds.forEach((id, i) => {
       const [offsetX, offsetY] = dragOffset;
       const itemEl = itemRefs[id];
-      itemEl.style.zIndex = 1000 + i + "";
+      itemEl.style.zIndex = 1000 - i + "";
       itemEl.style.transform = `
         translate(${clientX - offsetX}px, ${clientY - offsetY}px)
         rotate(${5 * i}deg)`;
@@ -137,6 +141,8 @@
           {item}
           order={i}
           isDragging={draggingIds.includes(item[identifier])}
+          isSelected={selectedIds.includes(item[identifier])}
+          on:select
         />
       </DragWrapper>
     {/each}
@@ -168,6 +174,7 @@
 
   .target-marker {
     position: absolute;
+    top: -2px;
     width: 100%;
     height: 4px;
     background-color: red;

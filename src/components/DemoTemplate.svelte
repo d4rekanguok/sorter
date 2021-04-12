@@ -19,7 +19,7 @@
     position: relative;
     width: 100%;
     padding: 1rem;
-    margin-bottom: 0.5rem;
+    margin: 0.25rem 0;
     background-color: var(--theme);
     border-radius: 4px;
     display: flex;
@@ -32,5 +32,7 @@
   }
   .number {
     font-family: monospace;
+    opacity: 0.5;
+    font-weight: 600;
   }
 </style>

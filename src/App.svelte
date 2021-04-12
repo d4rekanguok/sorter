@@ -1,6 +1,7 @@
 <script lang="ts">
-  import DemoTemplate from "./lib/DemoTemplate.svelte";
-  import Sorter, { reorder } from "./lib/Sorter.svelte";
+  import DemoWrapper from "./components/DemoWrapper.svelte";
+  import DemoSimple from "./components/DemoSimple.svelte";
+  import DemoMultipleSelect from "./components/DemoMultipleSelect.svelte";
 
   interface Data {
     id: string;
@@ -13,22 +14,40 @@
     { id: "3", value: "aquamarine", label: "Aquamarine" },
     { id: "4", value: "slateblue", label: "Slateblue" },
   ];
-
-  let count = 0;
-
-  const handleDragEnd = (e) => {
-    const { from, to } = e.detail;
-    reorder(data, from, to);
-    count++;
-  };
 </script>
 
 <main>
-  <div class="demo-wrapper">
-    {#key count}
-      <Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
-    {/key}
-  </div>
+  <DemoWrapper>
+    <DemoSimple initialData={data} slot="sorter" />
+    <svelte:fragment slot="desc">
+      <h1>Simple List</h1>
+      <pre>
+        {
+`<Sorter
+  on:dragend={handleDragEnd}
+  template={DemoTemplate}
+  {data}
+/>`
+        }
+      </pre>
+    </svelte:fragment>
+  </DemoWrapper>
+
+  <DemoWrapper>
+    <DemoMultipleSelect initialData={data} slot="sorter" />
+    <svelte:fragment slot="desc">
+      <h1>Multiple Drag</h1>
+      <pre>
+        {
+`<Sorter
+  on:dragend={handleDragEnd}
+  template={DemoTemplate}
+  {data}
+/>`
+        }
+      </pre>
+    </svelte:fragment>
+  </DemoWrapper>
 </main>
 
 <style>
@@ -37,13 +56,17 @@
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   }
 
-  main {
-    position: relative;
-    top: 4rem;
-    left: 2rem;
+  :global(body) {
+    background-color: aliceblue;
   }
 
-  .demo-wrapper {
-    max-width: 320px;
+  main {
+    position: relative;
+    margin: 4rem auto;
+    max-width: 60rem;
+  }
+
+  pre {
+    font-size: 1.25rem;
   }
 </style>
