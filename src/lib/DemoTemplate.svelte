@@ -1,12 +1,11 @@
 <script lang="ts">
-  export let ref: HTMLElement;
   export let item = {
     value: "black",
     label: "Black",
   };
 </script>
 
-<div bind:this={ref} class="template" style={`--theme: ${item.value}`}>
+<div class="template" style={`--theme: ${item.value}`}>
   {item.label}
 </div>
 

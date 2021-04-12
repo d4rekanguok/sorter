@@ -7,17 +7,28 @@
     value: string;
     label: string;
   }
-  const data: Data[] = [
+  let data: Data[] = [
     { id: "1", value: "tomato", label: "Tomato" },
     { id: "2", value: "pink", label: "Pink" },
     { id: "3", value: "aquamarine", label: "Aquamarine" },
     { id: "4", value: "slateblue", label: "Slateblue" },
   ];
+
+  let count = 0;
+
+  const handleDragEnd = (e) => {
+    const { from, to } = e.detail;
+    const froms = from.flatMap((index, i) => data.splice(index + i, 1));
+    data.splice(to, 0, ...froms);
+    count++;
+  };
 </script>
 
 <main>
   <div class="demo-wrapper">
-    <Sorter template={DemoTemplate} {data} />
+    {#key count}
+      <Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
+    {/key}
   </div>
 </main>
 
