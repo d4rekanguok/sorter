@@ -5,6 +5,7 @@
 
 <script lang="ts">
   import { onMount, createEventDispatcher } from "svelte";
+  import { spring } from "svelte/motion";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
   import { place as defaultPlace, unplace as defaultUnplace } from "./place";
   import { setDataImage, measureContainer, getDragOffset } from "./domHelpers";
@@ -34,6 +35,14 @@
   let orderedIds: Array<string | number> = data.map((item) => item[identifier]);
   let draggingIds: Array<string | number> = [];
   let dropOrderId: number = 0;
+
+  let itemsPos = spring(
+    {},
+    {
+      stiffness: 0.1,
+      damping: 0.25,
+    }
+  );
 
   const dispatch = createEventDispatcher();
 
@@ -107,6 +116,11 @@
     // move other items around
     orderedIds.forEach((id, i) => {
       const [x, y] = place(i, templateDimension);
+      // itemsPos.set({
+      //   [id+'x']: x,
+      //   [id+'y']: y
+      // })
+
       const itemEl = itemRefs[id];
       itemEl.style.transform = `translate(${x}px, ${y}px)`;
     });
