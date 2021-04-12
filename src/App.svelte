@@ -1,6 +1,6 @@
 <script lang="ts">
   import DemoTemplate from "./lib/DemoTemplate.svelte";
-  import Sorter from "./lib/Sorter.svelte";
+  import Sorter, { reorder } from "./lib/Sorter.svelte";
 
   interface Data {
     id: string;
@@ -18,8 +18,7 @@
 
   const handleDragEnd = (e) => {
     const { from, to } = e.detail;
-    const froms = from.flatMap((index, i) => data.splice(index + i, 1));
-    data.splice(to, 0, ...froms);
+    reorder(data, from, to);
     count++;
   };
 </script>
@@ -36,6 +35,12 @@
   :root {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  }
+
+  main {
+    position: relative;
+    top: 4rem;
+    left: 2rem;
   }
 
   .demo-wrapper {

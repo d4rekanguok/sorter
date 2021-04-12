@@ -12,6 +12,8 @@
   draggable={true}
   data-order={order}
   data-id={id}
+  data-pos-x={x}
+  data-pos-y={y}
   style={`transform: translate(${x}px, ${y}px)`}
 >
   <slot />
