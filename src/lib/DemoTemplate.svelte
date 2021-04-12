@@ -1,12 +1,17 @@
 <script lang="ts">
+  export let order = 0;
+  export let isDragging = false;
   export let item = {
     value: "black",
     label: "Black",
   };
 </script>
 
-<div class="template" style={`--theme: ${item.value}`}>
-  {item.label}
+<div class="template" class:isDragging style={`--theme: ${item.value}`}>
+  <span class="number">{order}</span>
+  <span>
+    {item.label}
+  </span>
 </div>
 
 <style>
@@ -17,5 +22,15 @@
     margin-bottom: 0.5rem;
     background-color: var(--theme);
     border-radius: 4px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .template.isDragging {
+    box-shadow: 0 6px 12px -5px rgba(0, 0, 0, 0.3),
+      0 12px 24px -10px rgba(0, 0, 0, 0.2);
+  }
+  .number {
+    font-family: monospace;
   }
 </style>

@@ -132,7 +132,12 @@
         id={item[identifier]}
         order={i}
       >
-        <svelte:component this={template} {item} />
+        <svelte:component
+          this={template}
+          {item}
+          order={i}
+          isDragging={draggingIds.includes(item[identifier])}
+        />
       </DragWrapper>
     {/each}
   {/if}
