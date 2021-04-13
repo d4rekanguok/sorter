@@ -6,6 +6,10 @@
   let data = [...initialData];
   let selectedIds = [];
 
+  const handleDeselect = () => {
+    selectedIds = [];
+  };
+
   const handleDragEnd = (e) => {
     const { from, to } = e.detail;
     reorder(data, from, to);
@@ -25,6 +29,7 @@
   };
 </script>
 
+<button on:click={handleDeselect}>Deselect all</button>
 <Sorter
   on:dragend={handleDragEnd}
   on:select={handleSelect}
@@ -32,3 +37,14 @@
   {selectedIds}
   {data}
 />
+
+<style>
+  button {
+    border: none;
+    background: transparent;
+    padding: 0.25rem 0;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: slateblue;
+  }
+</style>

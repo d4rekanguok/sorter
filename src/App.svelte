@@ -62,7 +62,8 @@
 
   main {
     position: relative;
-    margin: 4rem auto;
+    margin: 0 auto;
+    padding: 8rem 0;
     max-width: 60rem;
   }
 

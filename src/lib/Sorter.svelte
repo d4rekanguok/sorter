@@ -171,6 +171,7 @@
 
   const handleScroll = () => {
     scrollPos = [window.scrollX, window.scrollY];
+    containerDimension = measureContainer(containerRef);
   };
 
   $: isDragging = draggingIds.length > 0;
