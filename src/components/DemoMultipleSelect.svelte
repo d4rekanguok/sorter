@@ -5,12 +5,11 @@
   export let initialData = [];
   let data = [...initialData];
   let selectedIds = [];
-  let count = 0;
 
   const handleDragEnd = (e) => {
     const { from, to } = e.detail;
     reorder(data, from, to);
-    count++;
+    data = data;
   };
 
   const handleSelect = (e) => {
@@ -26,12 +25,10 @@
   };
 </script>
 
-{#key count}
-  <Sorter
-    on:dragend={handleDragEnd}
-    on:select={handleSelect}
-    template={DemoTemplateSelect}
-    {selectedIds}
-    {data}
-  />
-{/key}
+<Sorter
+  on:dragend={handleDragEnd}
+  on:select={handleSelect}
+  template={DemoTemplateSelect}
+  {selectedIds}
+  {data}
+/>

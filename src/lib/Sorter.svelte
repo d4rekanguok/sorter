@@ -5,7 +5,10 @@
 
 <script lang="ts">
   import { onMount, createEventDispatcher } from "svelte";
+  import { writable } from "svelte/store";
+  import type { Writable } from "svelte/store";
   import { spring } from "svelte/motion";
+  import type { Spring } from "svelte/motion";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
   import { place as defaultPlace, unplace as defaultUnplace } from "./place";
   import { setDataImage, measureContainer, getDragOffset } from "./domHelpers";
@@ -26,40 +29,65 @@
   let templateDimension: [number, number] = [0, 0];
   let containerDimension: DOMRect;
   let dragOffset: [number, number] = [0, 0];
+  let scrollPos: [number, number] = [0, 0];
 
   let templateSample: any;
   let containerRef: HTMLDivElement = null;
-  let itemRefs: Record<string, HTMLElement> = {};
   let markerRef: HTMLElement = null;
 
   let orderedIds: Array<string | number> = data.map((item) => item[identifier]);
   let draggingIds: Array<string | number> = [];
   let dropOrderId: number = 0;
 
-  let itemsPos = spring(
-    {},
-    {
+  type PosStore = Record<"x" | "y" | "rotate", number>;
+
+  const createPos = (
+    value: PosStore,
+    config = {
       stiffness: 0.1,
-      damping: 0.25,
+      damping: 0.4,
     }
-  );
+  ) => {
+    return spring(value, config);
+  };
+
+  const itemPoses: Record<
+    string,
+    { pos: Spring<PosStore>; zIndex: Writable<number> }
+  > = data.reduce((acc, item) => {
+    const id = item[identifier];
+    acc[id] = {
+      zIndex: writable(10),
+      pos: createPos({ x: 0, y: 0, rotate: 0 }),
+    };
+    return acc;
+  }, {});
 
   const dispatch = createEventDispatcher();
 
   onMount(() => {
     templateDimension = measureTemplateSize(templateSample);
     containerDimension = measureContainer(containerRef);
+
+    data.forEach((item, i) => {
+      const id = item[identifier];
+      const [x, y] = place(i, templateDimension);
+      itemPoses[id].pos.set({ x, y, rotate: 0 });
+    });
+
     ready = true;
   });
 
   const handleDragStart = (e) => {
-    const { clientX, clientY } = e;
     const itemEl = e.target as HTMLElement;
     if (!itemEl) return;
 
     setDataImage(e);
 
     // calculate offset so the dragged item move seamlessly with the cursor
+    const { clientX, clientY } = e;
+    // const [scrollX, scrollY] = scrollPos;
+
     const itemX = +itemEl.dataset.posX;
     const itemY = +itemEl.dataset.posY;
     dragOffset = getDragOffset([clientX, clientY], [itemX, itemY]);
@@ -70,16 +98,25 @@
     const selectedIndexes = selectedIds.map((id) => orderedIds.indexOf(id));
     const draggingIndexes = [...new Set([order].concat(selectedIndexes))];
     draggingIds = removeItemsFromArray(orderedIds, draggingIndexes);
-    orderedIds = [...orderedIds];
+    orderedIds = orderedIds;
   };
 
   const handleDragEnd = () => {
-    // orderedIds.splice(dropOrderId, 0, ...draggingIds);
-    // orderedIds = [...orderedIds];
-    // draggingIds = [];
+    orderedIds.splice(dropOrderId, 0, ...draggingIds);
+
+    // reset order
+    orderedIds.forEach((id, i) => {
+      const [x, y] = place(i, templateDimension);
+      const { zIndex, pos } = itemPoses[id];
+      pos.set({ x, y, rotate: 0 });
+      zIndex.set(10);
+    });
+
     const draggingIndexes = draggingIds.map((id) =>
       data.findIndex((item) => item[identifier] === id)
     );
+    draggingIds = [];
+
     dispatch("dragend", {
       from: draggingIndexes,
       to: dropOrderId,
@@ -106,23 +143,25 @@
     // stick items being dragged to the cursor
     draggingIds.forEach((id, i) => {
       const [offsetX, offsetY] = dragOffset;
-      const itemEl = itemRefs[id];
-      itemEl.style.zIndex = 1000 - i + "";
-      itemEl.style.transform = `
-        translate(${clientX - offsetX}px, ${clientY - offsetY}px)
-        rotate(${5 * i}deg)`;
+      const { pos, zIndex } = itemPoses[id];
+      pos.set({
+        x: clientX - offsetX,
+        y: clientY - offsetY,
+        rotate: 5 * i,
+      });
+      zIndex.set(100 - i);
     });
 
     // move other items around
     orderedIds.forEach((id, i) => {
       const [x, y] = place(i, templateDimension);
-      // itemsPos.set({
-      //   [id+'x']: x,
-      //   [id+'y']: y
-      // })
 
-      const itemEl = itemRefs[id];
-      itemEl.style.transform = `translate(${x}px, ${y}px)`;
+      const { pos } = itemPoses[id];
+      pos.set({
+        x,
+        y,
+        rotate: 0,
+      });
     });
   };
 
@@ -130,9 +169,14 @@
     console.log("dropped");
   };
 
+  const handleScroll = () => {
+    scrollPos = [window.scrollX, window.scrollY];
+  };
+
   $: isDragging = draggingIds.length > 0;
 </script>
 
+<svelte:window on:scroll={handleScroll} />
 <div
   class="wrapper"
   bind:this={containerRef}
@@ -145,9 +189,9 @@
   {#if ready}
     {#each data as item, i (item[identifier])}
       <DragWrapper
-        bind:ref={itemRefs[item[identifier]]}
-        position={place(i, templateDimension)}
+        position={itemPoses[item[identifier]].pos}
         id={item[identifier]}
+        zIndex={itemPoses[item[identifier]].zIndex}
         order={i}
       >
         <svelte:component
@@ -169,7 +213,11 @@
   <!-- measure element off-screen -->
   {#if !ready}
     <div class="offscreen-measurer">
-      <DragWrapper bind:ref={templateSample}>
+      <DragWrapper
+        bind:ref={templateSample}
+        position={createPos({ x: 0, y: 0, rotate: 0 })}
+        zIndex={writable(10)}
+      >
         <svelte:component this={template} item={data[0]} />
       </DragWrapper>
     </div>

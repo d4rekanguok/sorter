@@ -9,10 +9,10 @@
     label: string;
   }
   let data: Data[] = [
-    { id: "1", value: "tomato", label: "Tomato" },
-    { id: "2", value: "pink", label: "Pink" },
-    { id: "3", value: "aquamarine", label: "Aquamarine" },
-    { id: "4", value: "slateblue", label: "Slateblue" },
+    { id: "a1", value: "tomato", label: "Tomato" },
+    { id: "b2", value: "pink", label: "Pink" },
+    { id: "c3", value: "aquamarine", label: "Aquamarine" },
+    { id: "d4", value: "slateblue", label: "Slateblue" },
   ];
 </script>
 

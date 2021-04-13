@@ -1,9 +1,15 @@
 <script lang="ts">
+  import type { Spring } from "svelte/motion";
+  import type { Writable } from "svelte/store";
   export let ref: HTMLElement;
-  export let position = [0, 0];
+  export let position: Spring<Record<"x" | "y" | "rotate", number>>;
   export let order = 0;
+  export let zIndex: Writable<number>;
   export let id: string | number = "temp";
-  const [x, y] = position;
+
+  $: x = $position.x;
+  $: y = $position.y;
+  $: rotate = $position.rotate;
 </script>
 
 <div
@@ -14,7 +20,7 @@
   data-id={id}
   data-pos-x={x}
   data-pos-y={y}
-  style={`transform: translate(${x}px, ${y}px)`}
+  style="transform: translate({x}px, {y}px) rotate({rotate}deg); z-index: {$zIndex}"
 >
   <slot />
 </div>

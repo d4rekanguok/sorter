@@ -7,13 +7,10 @@
 
   const handleDragEnd = (e) => {
     const { from, to } = e.detail;
-    reorder(data, from, to);
-    count++;
+    data = reorder(data, from, to);
   };
-
-  let count = 0;
 </script>
 
-{#key count}
-  <Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
-{/key}
+<!-- {#key count} -->
+<Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
+<!-- {/key} -->
