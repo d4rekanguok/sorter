@@ -195,6 +195,7 @@
   {#if ready}
     {#each data as item, i (item[identifier])}
       <DragWrapper
+        dimension={templateDimension}
         position={itemPoses[item[identifier]].pos}
         id={item[identifier]}
         zIndex={itemPoses[item[identifier]].zIndex}
@@ -220,13 +221,9 @@
   <!-- measure element off-screen -->
   {#if !ready}
     <div class="offscreen-measurer">
-      <DragWrapper
-        bind:ref={templateSample}
-        position={createPos({ x: 0, y: 0, rotate: 0 })}
-        zIndex={writable(10)}
-      >
+      <div class="measurer" bind:this={templateSample}>
         <svelte:component this={template} item={data[0]} />
-      </DragWrapper>
+      </div>
     </div>
   {/if}
 </div>
@@ -248,5 +245,10 @@
     width: 100%;
     height: 2px;
     background-color: pink;
+  }
+
+  .measurer {
+    position: absolute;
+    width: 100%;
   }
 </style>

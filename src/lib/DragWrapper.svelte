@@ -6,6 +6,7 @@
   export let order = 0;
   export let zIndex: Writable<number>;
   export let isDragging: boolean;
+  export let dimension = [0, 0];
   export let id: string | number = "temp";
 
   $: x = $position.x;
@@ -22,7 +23,14 @@
   data-id={id}
   data-pos-x={x}
   data-pos-y={y}
-  style="transform: translate({x}px, {y}px) rotate({rotate}deg); z-index: {$zIndex}"
+  style="
+    width: {dimension[0]}px;
+    height: {dimension[1]};
+    transform:
+      translate({x}px, {y}px)
+      rotate({rotate}deg);
+    z-index: {$zIndex}
+  "
 >
   <slot />
 </div>
