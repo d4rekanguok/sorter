@@ -235,6 +235,7 @@
   .wrapper {
     position: relative;
     width: 100%;
+    height: 100%;
   }
 
   .offscreen-measurer {

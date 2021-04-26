@@ -30,7 +30,8 @@
     position: relative;
     padding: 1rem;
     background-color: white;
-    min-height: 45vh;
+    /* we need a fixed height for the container */
+    height: 45vh;
     border-radius: 6px;
     border: 1px solid lightsteelblue;
     overflow: hidden;
