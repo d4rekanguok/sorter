@@ -8,7 +8,9 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "next",
+    "css-color-names": "^1.0.1",
     "esm": "^3.2.25",
+    "nanoid": "^3.1.22",
     "svelte": "^3.35.0",
     "svelte-preprocess": "^4.6.9",
     "ts-node": "^9.1.1",

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import colors from "css-color-names";
+  import { nanoid } from "nanoid";
   import DemoWrapper from "./components/DemoWrapper.svelte";
   import DemoSimple from "./components/DemoSimple.svelte";
   import DemoMultipleSelect from "./components/DemoMultipleSelect.svelte";
@@ -8,16 +10,16 @@
     value: string;
     label: string;
   }
-  let data: Data[] = [
-    { id: "a1", value: "tomato", label: "Tomato" },
-    { id: "b2", value: "pink", label: "Pink" },
-    { id: "c3", value: "aquamarine", label: "Aquamarine" },
-    { id: "d4", value: "slateblue", label: "Slateblue" },
-  ];
+
+  let data: Data[] = Object.keys(colors).map((color) => ({
+    id: nanoid(6),
+    value: color,
+    label: color,
+  }));
 </script>
 
-<main>
-  <DemoWrapper>
+<main on:drop|preventDefault={() => null}>
+  <!-- <DemoWrapper>
     <DemoSimple initialData={data} slot="sorter" />
     <svelte:fragment slot="desc">
       <h1>Simple List</h1>
@@ -31,7 +33,7 @@
         }
       </pre>
     </svelte:fragment>
-  </DemoWrapper>
+  </DemoWrapper> -->
 
   <DemoWrapper>
     <DemoMultipleSelect initialData={data} slot="sorter" />

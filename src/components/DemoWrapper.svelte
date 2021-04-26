@@ -33,5 +33,6 @@
     min-height: 45vh;
     border-radius: 6px;
     border: 1px solid lightsteelblue;
+    overflow: hidden;
   }
 </style>

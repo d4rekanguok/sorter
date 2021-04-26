@@ -26,7 +26,7 @@
 
   /* true when all required measurements are done */
   let ready = false;
-  let templateDimension: [number, number] = [0, 0];
+  let templateDimension: [number, number];
   let containerDimension: DOMRect;
   let dragOffset: [number, number] = [0, 0];
   let scrollPos: [number, number] = [0, 0];
@@ -51,30 +51,32 @@
     return spring(value, config);
   };
 
-  const itemPoses: Record<
-    string,
-    { pos: Spring<PosStore>; zIndex: Writable<number> }
-  > = data.reduce((acc, item) => {
-    const id = item[identifier];
-    acc[id] = {
-      zIndex: writable(10),
-      pos: createPos({ x: 0, y: 0, rotate: 0 }),
-    };
-    return acc;
-  }, {});
+  const setPositionAll = (
+    data,
+    templateDimension,
+    place,
+    identifier
+  ): Record<string, { pos: Spring<PosStore>; zIndex: Writable<number> }> => {
+    return data.reduce((itemPoses, item, i) => {
+      const id = item[identifier];
+      const [x, y] = templateDimension ? place(i, templateDimension) : [0, 0];
+
+      itemPoses[id] = {
+        zIndex: writable(10),
+        pos: createPos({ x, y, rotate: 0 }),
+      };
+
+      return itemPoses;
+    }, {});
+  };
+
+  $: itemPoses = setPositionAll(data, templateDimension, place, identifier);
 
   const dispatch = createEventDispatcher();
 
   onMount(() => {
     templateDimension = measureTemplateSize(templateSample);
     containerDimension = measureContainer(containerRef);
-
-    data.forEach((item, i) => {
-      const id = item[identifier];
-      const [x, y] = place(i, templateDimension);
-      itemPoses[id].pos.set({ x, y, rotate: 0 });
-    });
-
     ready = true;
   });
 
@@ -117,10 +119,13 @@
     );
     draggingIds = [];
 
-    dispatch("dragend", {
-      from: draggingIndexes,
-      to: dropOrderId,
-    });
+    /* how can we reduce duplicate reset work & avoid using setTimeout? */
+    setTimeout(() => {
+      dispatch("dragend", {
+        from: draggingIndexes,
+        to: dropOrderId,
+      });
+    }, 400);
   };
 
   const handleDrag = (e) => {
@@ -193,6 +198,7 @@
         position={itemPoses[item[identifier]].pos}
         id={item[identifier]}
         zIndex={itemPoses[item[identifier]].zIndex}
+        isDragging={draggingIds.includes(item[identifier])}
         order={i}
       >
         <svelte:component
@@ -237,9 +243,9 @@
 
   .target-marker {
     position: absolute;
-    top: -2px;
+    top: -1px;
     width: 100%;
-    height: 4px;
-    background-color: red;
+    height: 2px;
+    background-color: pink;
   }
 </style>

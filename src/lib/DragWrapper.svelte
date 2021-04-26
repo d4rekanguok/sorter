@@ -5,6 +5,7 @@
   export let position: Spring<Record<"x" | "y" | "rotate", number>>;
   export let order = 0;
   export let zIndex: Writable<number>;
+  export let isDragging: boolean;
   export let id: string | number = "temp";
 
   $: x = $position.x;
@@ -15,6 +16,7 @@
 <div
   bind:this={ref}
   class="drag-wrapper"
+  class:isDragging
   draggable={true}
   data-order={order}
   data-id={id}
@@ -28,6 +30,15 @@
 <style>
   .drag-wrapper {
     position: absolute;
-    width: 100%;
+    /* set top & left to inherit so
+     * we don't lose the position
+     * when switching to `fixed`
+     */
+    top: inherit;
+    left: inherit;
+  }
+
+  .isDragging {
+    position: fixed;
   }
 </style>
