@@ -1,13 +1,14 @@
 <script lang="ts">
   import type { Spring } from "svelte/motion";
   import type { Writable } from "svelte/store";
-  export let parentPos: [number, number] = [0, 0];
+  export let parentPos: readonly [number, number] = [0, 0];
   export let position: Spring<Record<"x" | "y" | "rotate", number>>;
   export let order = 0;
   export let zIndex: Writable<number>;
   export let isDragging: boolean;
   export let dimension = [0, 0];
   export let id: string | number = "temp";
+  export let draggable = true;
 
   $: x = $position.x;
   $: y = $position.y;
@@ -16,7 +17,7 @@
 
 <div
   class="drag-wrapper"
-  draggable={true}
+  {draggable}
   data-order={order}
   data-id={id}
   data-pos-x={x}
@@ -39,3 +40,9 @@
 >
   <slot />
 </div>
+
+<style>
+  .drag-wrapper {
+    user-select: none;
+  }
+</style>

@@ -11,14 +11,19 @@
     label: string;
   }
 
-  let data: Data[] = Object.keys(colors).map((color) => ({
-    id: nanoid(6),
-    value: color,
-    label: color,
-  }));
+  let data: Data[] = Object.keys(colors)
+    .filter((_, i) => i < 10)
+    .map((color) => ({
+      id: nanoid(6),
+      value: color,
+      label: color,
+    }));
 </script>
 
-<main on:drop|preventDefault={() => null}>
+<main
+  on:dragover|preventDefault={() => null}
+  on:drop|preventDefault={() => null}
+>
   <DemoWrapper>
     <DemoSimple initialData={data} slot="sorter" />
     <svelte:fragment slot="desc">

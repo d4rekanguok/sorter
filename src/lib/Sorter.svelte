@@ -39,6 +39,8 @@
   let draggingIds: Array<string | number> = [];
   let dropOrderId: number = 0;
 
+  let dragCompleted = true;
+
   type PosStore = Record<"x" | "y" | "rotate", number>;
 
   const createPos = (
@@ -82,6 +84,8 @@
   });
 
   const handleDragStart = (e) => {
+    dragCompleted = false;
+    orderedIds = data.map((item) => item[identifier]);
     const itemEl = e.target as HTMLElement;
     if (!itemEl) return;
 
@@ -101,6 +105,7 @@
     scrollPos.stop();
 
     orderedIds.splice(dropOrderId, 0, ...draggingIds);
+    orderedIds = orderedIds;
 
     // reset order
     orderedIds.forEach((id, i) => {
@@ -117,6 +122,7 @@
     /* how can we reduce duplicate reset work & avoid using setTimeout? */
     setTimeout(() => {
       draggingIds = [];
+      dragCompleted = true;
 
       dispatch("dragend", {
         from: draggingIndexes,
@@ -199,6 +205,13 @@
 
   $: isDragging = draggingIds.length > 0;
   $: handleAutoScroll($scrollPos);
+
+  $: offsetPos = containerDimension
+    ? ([
+        containerDimension.left - $scrollPos[0],
+        containerDimension.top - $scrollPos[1],
+      ] as const)
+    : ([0, 0] as const);
 </script>
 
 <svelte:window on:scroll={handleWindowScroll} />
@@ -218,10 +231,8 @@
           position={itemPoses[item[identifier]].pos}
           id={item[identifier]}
           zIndex={itemPoses[item[identifier]].zIndex}
-          parentPos={[
-            containerDimension.left - $scrollPos[0],
-            containerDimension.top - $scrollPos[1],
-          ]}
+          parentPos={offsetPos}
+          draggable={dragCompleted}
           isDragging={draggingIds.includes(item[identifier])}
           order={i}
         >
