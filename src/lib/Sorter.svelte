@@ -11,8 +11,9 @@
   import type { Spring } from "svelte/motion";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
   import { place as defaultPlace, unplace as defaultUnplace } from "./place";
-  import { setDataImage, measureContainer, getDragOffset } from "./domHelpers";
+  import { setDataImage, measureContainer } from "./domHelpers";
   import { removeItemsFromArray } from "./removeItems";
+  import { createAutoScrollStore } from "./autoScroll";
 
   import DragWrapper from "./DragWrapper.svelte";
 
@@ -28,8 +29,7 @@
   let ready = false;
   let templateDimension: [number, number];
   let containerDimension: DOMRect;
-  let dragOffset: [number, number] = [0, 0];
-  let scrollPos: [number, number] = [0, 0];
+  let scrollPos = createAutoScrollStore();
 
   let templateSample: any;
   let containerRef: HTMLDivElement = null;
@@ -77,6 +77,7 @@
   onMount(() => {
     templateDimension = measureTemplateSize(templateSample);
     containerDimension = measureContainer(containerRef);
+
     ready = true;
   });
 
@@ -85,14 +86,6 @@
     if (!itemEl) return;
 
     setDataImage(e);
-
-    // calculate offset so the dragged item move seamlessly with the cursor
-    const { clientX, clientY } = e;
-    // const [scrollX, scrollY] = scrollPos;
-
-    const itemX = +itemEl.dataset.posX;
-    const itemY = +itemEl.dataset.posY;
-    dragOffset = getDragOffset([clientX, clientY], [itemX, itemY]);
 
     const item = e.target as HTMLElement;
     const order = +item.dataset.order;
@@ -104,6 +97,9 @@
   };
 
   const handleDragEnd = () => {
+    // make sure autoscroll stops
+    scrollPos.stop();
+
     orderedIds.splice(dropOrderId, 0, ...draggingIds);
 
     // reset order
@@ -132,9 +128,18 @@
     const { clientX, clientY } = e;
     if (clientX === 0 || clientY === 0) return;
 
-    const { left: cx, top: cy } = containerDimension;
-    const x = clientX - cx;
-    const y = clientY - cy;
+    const { left: cx, top: cy, bottom: cb } = containerDimension;
+    const [sx, sy] = $scrollPos;
+    const x = clientX - cx + sx;
+    const y = clientY - cy + sy;
+
+    if (clientY < cb && clientY > cb - 20) {
+      scrollPos.start({ direction: 1, axis: "y", delta: 2 });
+    } else if (clientY > cy && clientY < cy + 20) {
+      scrollPos.start({ direction: -1, axis: "y", delta: 2 });
+    } else {
+      scrollPos.stop();
+    }
 
     // calculate potential drop index
     dropOrderId = unplace([x, y], templateDimension, [0, orderedIds.length]);
@@ -147,11 +152,10 @@
 
     // stick items being dragged to the cursor
     draggingIds.forEach((id, i) => {
-      const [offsetX, offsetY] = dragOffset;
       const { pos, zIndex } = itemPoses[id];
       pos.set({
-        x: clientX - offsetX,
-        y: clientY - offsetY,
+        x: x - 25,
+        y: y - 25,
         rotate: 5 * i,
       });
       zIndex.set(100 - i);
@@ -170,48 +174,63 @@
     });
   };
 
-  const handleDrop = (e) => {
-    console.log("dropped");
-  };
-
-  const handleScroll = () => {
-    scrollPos = [window.scrollX, window.scrollY];
+  const handleWindowScroll = () => {
     containerDimension = measureContainer(containerRef);
   };
 
+  const handleManualScroll = () => {
+    if (!containerRef) return;
+    const y = containerRef.scrollTop;
+    const x = containerRef.scrollLeft;
+
+    scrollPos.set([x, y]);
+  };
+
+  const handleAutoScroll = ([x, y]) => {
+    if (!containerRef) return;
+    containerRef.scrollTop = y;
+    containerRef.scrollLeft = x;
+  };
+
   $: isDragging = draggingIds.length > 0;
+  $: handleAutoScroll($scrollPos);
 </script>
 
-<svelte:window on:scroll={handleScroll} />
-<div
-  class="wrapper"
-  bind:this={containerRef}
-  on:dragstart={handleDragStart}
-  on:dragend={handleDragEnd}
-  on:dragover|preventDefault={() => null}
-  on:drag|stopPropagation={handleDrag}
-  on:drop|preventDefault={handleDrop}
->
+<svelte:window on:scroll={handleWindowScroll} />
+<div class="wrapper" bind:this={containerRef} on:scroll={handleManualScroll}>
   {#if ready}
-    {#each data as item, i (item[identifier])}
-      <DragWrapper
-        dimension={templateDimension}
-        position={itemPoses[item[identifier]].pos}
-        id={item[identifier]}
-        zIndex={itemPoses[item[identifier]].zIndex}
-        isDragging={draggingIds.includes(item[identifier])}
-        order={i}
-      >
-        <svelte:component
-          this={template}
-          {item}
-          order={i}
+    <div
+      class="scroll-wrapper"
+      on:dragstart={handleDragStart}
+      on:dragend={handleDragEnd}
+      on:dragover|preventDefault={() => null}
+      on:drag|stopPropagation={handleDrag}
+      on:drop|preventDefault={() => null}
+    >
+      {#each data as item, i (item[identifier])}
+        <DragWrapper
+          dimension={templateDimension}
+          position={itemPoses[item[identifier]].pos}
+          id={item[identifier]}
+          zIndex={itemPoses[item[identifier]].zIndex}
+          parentPos={[
+            containerDimension.left - $scrollPos[0],
+            containerDimension.top - $scrollPos[1],
+          ]}
           isDragging={draggingIds.includes(item[identifier])}
-          isSelected={selectedIds.includes(item[identifier])}
-          on:select
-        />
-      </DragWrapper>
-    {/each}
+          order={i}
+        >
+          <svelte:component
+            this={template}
+            {item}
+            order={i}
+            isDragging={draggingIds.includes(item[identifier])}
+            isSelected={selectedIds.includes(item[identifier])}
+            on:select
+          />
+        </DragWrapper>
+      {/each}
+    </div>
   {/if}
 
   {#if isDragging}
@@ -233,6 +252,13 @@
     position: relative;
     width: 100%;
     height: 100%;
+    overflow-y: scroll;
+  }
+
+  .scroll-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
   }
 
   .offscreen-measurer {

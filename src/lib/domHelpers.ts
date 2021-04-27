@@ -8,15 +8,3 @@ export const setDataImage = (e) => {
 export const measureContainer = ($el: HTMLElement) => {
 	return $el.getBoundingClientRect();
 }
-
-export const getDragOffset = (
-	clientPosition: [number, number],
-	itemPosition: [number, number]
-): [number, number] => {
-	const [clientX, clientY] = clientPosition
-	const [itemX, itemY] = itemPosition
-	const offsetX = clientX - itemX
-	const offsetY = clientY - itemY
-
-	return [offsetX, offsetY]
-}

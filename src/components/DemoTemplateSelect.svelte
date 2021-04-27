@@ -20,7 +20,7 @@
 </script>
 
 <div class="template" class:isDragging style={`--theme: ${item.value}`}>
-  <label for={item.value}>
+  <label class="label" for={item.value}>
     <span class="number">{order}</span>
     <span>
       {item.label}
@@ -45,6 +45,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .label {
+    text-shadow: 1px 1px 0 white;
   }
 
   .template.isDragging {

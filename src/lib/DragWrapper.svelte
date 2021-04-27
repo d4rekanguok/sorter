@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Spring } from "svelte/motion";
   import type { Writable } from "svelte/store";
-  export let ref: HTMLElement;
+  export let parentPos: [number, number] = [0, 0];
   export let position: Spring<Record<"x" | "y" | "rotate", number>>;
   export let order = 0;
   export let zIndex: Writable<number>;
@@ -15,15 +15,20 @@
 </script>
 
 <div
-  bind:this={ref}
   class="drag-wrapper"
-  class:isDragging
   draggable={true}
   data-order={order}
   data-id={id}
   data-pos-x={x}
   data-pos-y={y}
   style="
+    position: {isDragging ? 'fixed' : 'absolute'};
+    top: {isDragging
+    ? parentPos[1] + 'px'
+    : 0};
+    left: {isDragging
+    ? parentPos[0] + 'px'
+    : 0};
     width: {dimension[0]}px;
     height: {dimension[1]};
     transform:
@@ -34,19 +39,3 @@
 >
   <slot />
 </div>
-
-<style>
-  .drag-wrapper {
-    position: absolute;
-    /* set top & left to inherit so
-     * we don't lose the position
-     * when switching to `fixed`
-     */
-    top: inherit;
-    left: inherit;
-  }
-
-  .isDragging {
-    position: fixed;
-  }
-</style>
