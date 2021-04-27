@@ -13,7 +13,7 @@
   import { place as defaultPlace, unplace as defaultUnplace } from "./place";
   import { setDataImage, measureContainer } from "./domHelpers";
   import { removeItemsFromArray } from "./removeItems";
-  import { createAutoScrollStore } from "./autoScroll";
+  import { createAutoScrollStore, detectScrollZone } from "./autoScroll";
 
   import DragWrapper from "./DragWrapper.svelte";
 
@@ -133,10 +133,14 @@
     const x = clientX - cx + sx;
     const y = clientY - cy + sy;
 
-    if (clientY < cb && clientY > cb - 20) {
-      scrollPos.start({ direction: 1, axis: "y", delta: 2 });
-    } else if (clientY > cy && clientY < cy + 20) {
-      scrollPos.start({ direction: -1, axis: "y", delta: 2 });
+    const { direction, axis } = detectScrollZone(
+      [clientX, clientY],
+      containerDimension,
+      20
+    );
+
+    if (axis === "y" && direction !== 0) {
+      scrollPos.start({ direction, axis, delta: 2 });
     } else {
       scrollPos.stop();
     }
