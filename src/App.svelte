@@ -19,7 +19,7 @@
 </script>
 
 <main on:drop|preventDefault={() => null}>
-  <!-- <DemoWrapper>
+  <DemoWrapper>
     <DemoSimple initialData={data} slot="sorter" />
     <svelte:fragment slot="desc">
       <h1>Simple List</h1>
@@ -33,7 +33,7 @@
         }
       </pre>
     </svelte:fragment>
-  </DemoWrapper> -->
+  </DemoWrapper>
 
   <DemoWrapper>
     <DemoMultipleSelect initialData={data} slot="sorter" />

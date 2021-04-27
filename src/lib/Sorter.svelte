@@ -4,11 +4,11 @@
 </script>
 
 <script lang="ts">
+  import type { Writable } from "svelte/store";
+  import type { Spring } from "svelte/motion";
   import { onMount, createEventDispatcher } from "svelte";
   import { writable } from "svelte/store";
-  import type { Writable } from "svelte/store";
   import { spring } from "svelte/motion";
-  import type { Spring } from "svelte/motion";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
   import { place as defaultPlace, unplace as defaultUnplace } from "./place";
   import { setDataImage, measureContainer } from "./domHelpers";
@@ -62,7 +62,7 @@
       const [x, y] = templateDimension ? place(i, templateDimension) : [0, 0];
 
       itemPoses[id] = {
-        zIndex: writable(10),
+        zIndex: writable(1),
         pos: createPos({ x, y, rotate: 0 }),
       };
 
@@ -107,16 +107,17 @@
       const [x, y] = place(i, templateDimension);
       const { zIndex, pos } = itemPoses[id];
       pos.set({ x, y, rotate: 0 });
-      zIndex.set(10);
+      zIndex.set(1);
     });
 
     const draggingIndexes = draggingIds.map((id) =>
       data.findIndex((item) => item[identifier] === id)
     );
-    draggingIds = [];
 
     /* how can we reduce duplicate reset work & avoid using setTimeout? */
     setTimeout(() => {
+      draggingIds = [];
+
       dispatch("dragend", {
         from: draggingIndexes,
         to: dropOrderId,
@@ -257,6 +258,7 @@
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    z-index: 1;
   }
 
   .scroll-wrapper {
