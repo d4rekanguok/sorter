@@ -28,6 +28,7 @@
     unplace,
     getContainerMaxDimension,
     setWrapperStyle,
+    setMarkerStyle,
   } = strategy;
 
   /* true when all required measurements are done */
@@ -38,7 +39,7 @@
   let offsetPos: [number, number] = [0, 0];
   let maxDimension: [number, number];
 
-  let templateSample: any;
+  let templateSample: HTMLDivElement;
   let containerRef: HTMLDivElement = null;
   let markerRef: HTMLElement = null;
 
@@ -96,6 +97,7 @@
 
   $: isDragging = draggingIds.length > 0;
   $: handleAutoScroll($scrollPos);
+  $: console.log({ containerDimension, templateDimension });
 
   $: if (containerDimension && templateDimension && data) {
     offsetPos = [
@@ -261,9 +263,9 @@
       style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
       on:dragstart={handleDragStart}
       on:dragend={handleDragEnd}
-      on:dragover|preventDefault={() => null}
       on:drag|stopPropagation={handleDrag}
       on:drop|preventDefault={() => null}
+      on:dragover|preventDefault={() => null}
     >
       {#each data as item, i (item[identifier])}
         <DragWrapper
@@ -290,7 +292,7 @@
   {/if}
 
   {#if isDragging}
-    <div bind:this={markerRef} class="target-marker" />
+    <div bind:this={markerRef} class="target-marker" style={setMarkerStyle()} />
   {/if}
 
   <!-- measure element off-screen -->
@@ -313,6 +315,7 @@
 
   .wrapper::-webkit-scrollbar {
     width: 3px;
+    height: 3px;
   }
 
   .wrapper::-webkit-scrollbar-track {
@@ -334,14 +337,11 @@
 
   .target-marker {
     position: absolute;
-    top: -1px;
-    width: 100%;
-    height: 2px;
-    background-color: pink;
   }
 
   .measurer {
     position: absolute;
     width: 100%;
+    height: 100%;
   }
 </style>

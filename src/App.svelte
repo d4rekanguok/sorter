@@ -4,6 +4,7 @@
   import DemoWrapper from "./components/DemoWrapper.svelte";
   import DemoSimple from "./components/DemoSimple.svelte";
   import DemoMultipleSelect from "./components/DemoMultipleSelect.svelte";
+  import DemoHorizontalSelect from "./components/DemoHorizontalSelect.svelte";
 
   interface Data {
     id: string;
@@ -12,7 +13,7 @@
   }
 
   let data: Data[] = Object.keys(colors)
-    .filter((_, i) => i < 10)
+    .filter((_, i) => i < 20)
     .map((color) => ({
       id: nanoid(6),
       value: color,
@@ -44,6 +45,22 @@
     <DemoMultipleSelect initialData={data} slot="sorter" />
     <svelte:fragment slot="desc">
       <h1>Multiple Drag</h1>
+      <pre>
+        {
+`<Sorter
+  on:dragend={handleDragEnd}
+  template={DemoTemplate}
+  {data}
+/>`
+        }
+      </pre>
+    </svelte:fragment>
+  </DemoWrapper>
+
+  <DemoWrapper layout="stack">
+    <DemoHorizontalSelect initialData={data} slot="sorter" />
+    <svelte:fragment slot="desc">
+      <h1>Horizontal</h1>
       <pre>
         {
 `<Sorter

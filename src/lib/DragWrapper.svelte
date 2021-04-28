@@ -31,7 +31,7 @@
     ? parentPos[0] + 'px'
     : 0};
     width: {dimension[0]}px;
-    height: {dimension[1]};
+    height: {dimension[1]}px;
     transform:
       translate({x}px, {y}px)
       rotate({rotate}deg);

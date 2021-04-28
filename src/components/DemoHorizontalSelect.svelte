@@ -1,6 +1,7 @@
 <script lang="ts">
   import Sorter, { reorder } from "../lib/Sorter.svelte";
-  import DemoTemplateSelect from "./DemoTemplateSelect.svelte";
+  import DemoTemplateSelect from "./DemoTemplateHorizontal.svelte";
+  import strategy from "../lib/strategies/horizontal";
 
   export let initialData = [];
   let data = [...initialData];
@@ -37,6 +38,7 @@
     template={DemoTemplateSelect}
     {selectedIds}
     {data}
+    {strategy}
   />
 </div>
 
@@ -56,7 +58,7 @@
     padding: 1rem;
     background-color: white;
     /* we need a fixed height for the container */
-    height: 45vh;
+    height: 18rem;
     border-radius: 6px;
     border: 1px solid lightsteelblue;
     overflow: hidden;

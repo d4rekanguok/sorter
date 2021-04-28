@@ -4,20 +4,21 @@ export const place = ({
   dragItemIndex,
   dimension
 }: PlaceArgs): [number, number] => {
-  const h = dimension[1]
-  const y = h * dragItemIndex
-  return [0, y]
+  const w = dimension[0]
+  const x = w * dragItemIndex
+  return [x, 0]
 }
 
 export const setWrapperStyle = () => {
-  return 'overflow-y: scroll; overflow-x: hidden';
+  return 'overflow-x: scroll; overflow-y: hidden';
 }
 
 export const setMarkerStyle = () => {
   return `
-    top: -1px;
-    width: 100%;
-    height: 2px;
+    top:0;
+    left: -1px;
+    width: 2px;
+    height: 100%;
     background-color: pink;
   `
 }
@@ -29,16 +30,16 @@ export const unplace = ({
   scrollPosition,
   length
 }: UnplaceArgs): number => {
-  const y = position[1]
-  const h = dimension[1]
-  const offsetY = scrollPosition[1]
+  const x = position[0]
+  const w = dimension[0]
+  const offsetX = scrollPosition[0]
 
-  const start = Math.ceil(offsetY / h);
+  const start = Math.ceil(offsetX / w);
   const end = Math.min(length, Math.floor(
-    (offsetY + containerDimension.height) / h
+    (offsetX + containerDimension.width) / w
   ))
 
-  const i = Math.round(y / h)
+  const i = Math.round(x / w)
   return Math.max(start, Math.min(end, i))
 } 
 
@@ -47,7 +48,7 @@ export const getContainerMaxDimension = (
   templateDimension: [number, number]
 ): [number, number] => {
   const [w, h] = templateDimension
-  return [w, h * length];
+  return [w * length, h];
 }
 
 const strategy = {

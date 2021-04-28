@@ -11,6 +11,21 @@
   };
 </script>
 
-<!-- {#key count} -->
-<Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
-<!-- {/key} -->
+<div class="demo-wrapper">
+  <Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
+</div>
+
+<style>
+  .demo-wrapper {
+    min-width: 18rem;
+    position: relative;
+    padding: 1rem;
+    background-color: white;
+    /* we need a fixed height for the container */
+    height: 45vh;
+    border-radius: 6px;
+    border: 1px solid lightsteelblue;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+</style>

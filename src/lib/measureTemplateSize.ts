@@ -1,4 +1,7 @@
-export const measureTemplateSize = (el: HTMLElement): [number, number] => {
+export const measureTemplateSize = (container: HTMLElement): [number, number] => {
+  const el = (container.childNodes[0]) as HTMLElement
+  if (!el) throw new Error('MeasureTemplateSize: No template found')
+
   const { width, height } = el.getBoundingClientRect()
   const { marginLeft, marginTop, marginRight, marginBottom } = getComputedStyle(el)
 

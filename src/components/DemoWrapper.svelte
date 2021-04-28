@@ -1,4 +1,8 @@
-<div class="container">
+<script lang="ts">
+  export let layout: "stack" | "row" = "row";
+</script>
+
+<div class="container" data-layout={layout}>
   <div class="demo-wrapper">
     <slot name="sorter" />
   </div>
@@ -11,10 +15,11 @@
   .container {
     position: relative;
     margin-bottom: 4rem;
+    border-bottom: 1px solid gainsboro;
   }
 
   @media (min-width: 18rem) {
-    .container {
+    .container[data-layout="row"] {
       display: flex;
       gap: 2rem;
       align-items: center;
@@ -25,15 +30,7 @@
     }
   }
 
-  .demo-wrapper {
-    min-width: 18rem;
-    position: relative;
-    padding: 1rem;
-    background-color: white;
-    /* we need a fixed height for the container */
-    height: 45vh;
-    border-radius: 6px;
-    border: 1px solid lightsteelblue;
-    overflow: hidden;
+  .container[data-layout="stack"] .description {
+    margin-bottom: 2rem;
   }
 </style>
