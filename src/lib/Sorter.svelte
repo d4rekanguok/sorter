@@ -10,11 +10,7 @@
   import { writable } from "svelte/store";
   import { spring } from "svelte/motion";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
-  import {
-    place as defaultPlace,
-    unplace as defaultUnplace,
-    getContainerMaxDimension as defaultGetMaxDimension,
-  } from "./place";
+  import strategyVertical from "./strategies/vertical";
   import { setDataImage, measureContainer } from "./domHelpers";
   import { removeItemsFromArray } from "./removeItems";
   import { createAutoScrollStore, detectScrollZone } from "./autoScroll";
@@ -25,9 +21,14 @@
   export let selectedIds: Array<string | number> = [];
   export let template = null;
   export let identifier = "id";
+  export let strategy = strategyVertical;
   export let measureTemplateSize = defaultTemplateMeasurer;
-  export let place = defaultPlace;
-  export let unplace = defaultUnplace;
+  const {
+    place,
+    unplace,
+    getContainerMaxDimension,
+    setWrapperStyle,
+  } = strategy;
 
   /* true when all required measurements are done */
   let ready = false;
@@ -102,7 +103,7 @@
       containerDimension.top - $scrollPos[1],
     ];
 
-    maxDimension = defaultGetMaxDimension(data.length, templateDimension);
+    maxDimension = getContainerMaxDimension(data.length, templateDimension);
   }
 
   const dispatch = createEventDispatcher();
@@ -184,7 +185,7 @@
     );
 
     if (axis === "y" && direction !== 0) {
-      scrollPos.start({ direction, axis, delta: 2 });
+      scrollPos.start({ direction, axis, delta: 3 });
     } else {
       scrollPos.stop();
     }
@@ -248,7 +249,12 @@
 </script>
 
 <svelte:window on:scroll={handleWindowScroll} />
-<div class="wrapper" bind:this={containerRef} on:scroll={handleManualScroll}>
+<div
+  class="wrapper"
+  style={setWrapperStyle()}
+  bind:this={containerRef}
+  on:scroll={handleManualScroll}
+>
   {#if ready}
     <div
       class="scroll-wrapper"
@@ -302,8 +308,20 @@
     position: relative;
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
     z-index: 1;
+  }
+
+  .wrapper::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .wrapper::-webkit-scrollbar-thumb {
+    background-color: pink;
+    border-radius: 100px;
   }
 
   .scroll-wrapper {

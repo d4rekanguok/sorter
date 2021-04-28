@@ -21,6 +21,10 @@ interface UnplaceArgs {
   length: number
 }
 
+export const setWrapperStyle = () => {
+  return 'overflow-y: scroll; overflow-x: hidden';
+}
+
 export const unplace = ({
   position, 
   dimension,
@@ -48,3 +52,12 @@ export const getContainerMaxDimension = (
   const [w, h] = templateDimension
   return [w, h * length];
 }
+
+const vertical = {
+  place,
+  unplace,
+  getContainerMaxDimension,
+  setWrapperStyle,
+}
+
+export default vertical
