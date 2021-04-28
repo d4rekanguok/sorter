@@ -195,7 +195,7 @@
       dimension: templateDimension,
       containerDimension,
       scrollPosition: $scrollPos,
-      length: data.length,
+      length: orderedIds.length,
     });
 
     // bring the marker to the potential drop position

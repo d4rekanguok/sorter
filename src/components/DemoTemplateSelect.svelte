@@ -21,7 +21,7 @@
 
 <div class="template" class:isDragging style={`--theme: ${item.value}`}>
   <label class="label" for={item.value}>
-    <span class="number">{order}</span>
+    <span class="number">{order + 1}</span>
     <span>
       {item.label}
     </span>
