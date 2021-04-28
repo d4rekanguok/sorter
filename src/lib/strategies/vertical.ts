@@ -50,12 +50,21 @@ export const getContainerMaxDimension = (
   return [w, h * length];
 }
 
+export const autoScroll = ({ axis, direction, scrollPos, bound }) => {
+  if (axis === "y" && direction !== 0) {
+    scrollPos.start({ direction, axis, delta: 3, bound });
+  } else {
+    scrollPos.stop();
+  }
+}
+
 const strategy = {
   place,
   unplace,
   getContainerMaxDimension,
   setWrapperStyle,
   setMarkerStyle,
+  autoScroll,
 }
 
 export default strategy

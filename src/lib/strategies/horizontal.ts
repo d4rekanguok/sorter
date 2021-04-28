@@ -15,7 +15,7 @@ export const setWrapperStyle = () => {
 
 export const setMarkerStyle = () => {
   return `
-    top:0;
+    top: 0;
     left: -1px;
     width: 2px;
     height: 100%;
@@ -51,12 +51,21 @@ export const getContainerMaxDimension = (
   return [w * length, h];
 }
 
+export const autoScroll = ({ axis, direction, scrollPos, bound }) => {
+  if (axis === "x" && direction !== 0) {
+    scrollPos.start({ direction, axis, delta: 3, bound });
+  } else {
+    scrollPos.stop();
+  }
+}
+
 const strategy = {
   place,
   unplace,
   getContainerMaxDimension,
   setWrapperStyle,
   setMarkerStyle,
+  autoScroll,
 }
 
 export default strategy

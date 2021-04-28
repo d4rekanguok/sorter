@@ -1,30 +1,31 @@
 import { writable } from 'svelte/store'
 
-interface MoveArgs {
-  direction: -1 | 1 | 0
-  axis: 'x' | 'y'
-  delta: number
-}
-
 //Rectangle [x     , y     , w     , h     ]
 type Rect = [number, number, number, number]
 type Point= [number, number]
+
+interface MoveArgs {
+  direction: -1 | 1 | 0
+  axis: 'x' | 'y'
+  delta: number,
+  bound: Rect
+}
 
 export const isOverlapped = (p: Point , r: Rect) => {
   const [px, py] = p
   const [rx, ry, rw, rh] = r
 
-  return (px > rx) 
-    && (px < (rx + rw)) 
-    && (py > ry) 
-    && (py < (ry + rh))
+  return (px >= rx) 
+    && (px <= (rx + rw)) 
+    && (py >= ry) 
+    && (py <= (ry + rh))
 }
 
 export const detectScrollZone = (
   clientPos: [number, number], 
   bound: DOMRect, 
   size: number
-): Omit<MoveArgs, 'delta'> => {
+): Omit<MoveArgs, 'delta' | 'bound'> => {
   let direction: 1 | -1 | 0 = 0
   let axis: 'x' | 'y' = 'y'
 
@@ -76,13 +77,18 @@ export const createAutoScrollStore = () => {
     })
   }
 
-  const move = ({ direction, axis, delta }: MoveArgs) => {
+  const move = ({ direction, axis, delta, bound }: MoveArgs) => {
     let id = axis === 'x' ? 0 : 1
     let change = delta * direction
   
     return update(scrollPos => {
-      scrollPos[id] += change
-      return scrollPos
+      const nextScrollPos = (scrollPos.slice()) as Point
+      nextScrollPos[id] += change
+      if (isOverlapped(nextScrollPos, bound)) {
+        return nextScrollPos
+      } else {
+        return scrollPos
+      }
     })
   }
 

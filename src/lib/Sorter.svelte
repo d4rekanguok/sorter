@@ -29,6 +29,7 @@
     getContainerMaxDimension,
     setWrapperStyle,
     setMarkerStyle,
+    autoScroll = () => null,
   } = strategy;
 
   /* true when all required measurements are done */
@@ -175,7 +176,7 @@
     const { clientX, clientY } = e;
     if (clientX === 0 || clientY === 0) return;
 
-    const { left: cx, top: cy, bottom: cb } = containerDimension;
+    const { left: cx, top: cy } = containerDimension;
     const [sx, sy] = $scrollPos;
     const x = clientX - cx + sx;
     const y = clientY - cy + sy;
@@ -186,11 +187,9 @@
       20
     );
 
-    if (axis === "y" && direction !== 0) {
-      scrollPos.start({ direction, axis, delta: 3 });
-    } else {
-      scrollPos.stop();
-    }
+    autoScroll({ axis, direction, scrollPos, bound: [
+      0, 0, ...maxDimension
+    ] });
 
     // calculate potential drop index
     dropOrderId = unplace({
