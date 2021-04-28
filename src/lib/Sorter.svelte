@@ -10,7 +10,11 @@
   import { writable } from "svelte/store";
   import { spring } from "svelte/motion";
   import { measureTemplateSize as defaultTemplateMeasurer } from "./measureTemplateSize";
-  import { place as defaultPlace, unplace as defaultUnplace } from "./place";
+  import {
+    place as defaultPlace,
+    unplace as defaultUnplace,
+    getContainerMaxDimension as defaultGetMaxDimension,
+  } from "./place";
   import { setDataImage, measureContainer } from "./domHelpers";
   import { removeItemsFromArray } from "./removeItems";
   import { createAutoScrollStore, detectScrollZone } from "./autoScroll";
@@ -30,6 +34,8 @@
   let templateDimension: [number, number];
   let containerDimension: DOMRect;
   let scrollPos = createAutoScrollStore();
+  let offsetPos: [number, number] = [0, 0];
+  let maxDimension: [number, number];
 
   let templateSample: any;
   let containerRef: HTMLDivElement = null;
@@ -40,7 +46,7 @@
   let dropOrderId: number = 0;
 
   let dragCompleted = true;
-  /* use a timer to keep track of */
+  /* use a timer to cancel final on:dragend event, if a new drag event starts */
   let timer = null;
 
   type PosStore = Record<"x" | "y" | "rotate", number>;
@@ -63,7 +69,12 @@
   ): Record<string, { pos: Spring<PosStore>; zIndex: Writable<number> }> => {
     return data.reduce((itemPoses, item, i) => {
       const id = item[identifier];
-      const [x, y] = templateDimension ? place(i, templateDimension) : [0, 0];
+      const [x, y] = templateDimension
+        ? place({
+            dragItemIndex: i,
+            dimension: templateDimension,
+          })
+        : [0, 0];
 
       itemPoses[id] = {
         zIndex: writable(1),
@@ -75,6 +86,24 @@
   };
 
   $: itemPoses = setPositionAll(data, templateDimension, place, identifier);
+
+  const handleAutoScroll = ([x, y]) => {
+    if (!containerRef) return;
+    containerRef.scrollTop = y;
+    containerRef.scrollLeft = x;
+  };
+
+  $: isDragging = draggingIds.length > 0;
+  $: handleAutoScroll($scrollPos);
+
+  $: if (containerDimension && templateDimension && data) {
+    offsetPos = [
+      containerDimension.left - $scrollPos[0],
+      containerDimension.top - $scrollPos[1],
+    ];
+
+    maxDimension = defaultGetMaxDimension(data.length, templateDimension);
+  }
 
   const dispatch = createEventDispatcher();
 
@@ -113,7 +142,10 @@
 
     // reset order
     orderedIds.forEach((id, i) => {
-      const [x, y] = place(i, templateDimension);
+      const [x, y] = place({
+        dragItemIndex: i,
+        dimension: templateDimension,
+      });
       const { zIndex, pos } = itemPoses[id];
       pos.set({ x, y, rotate: 0 });
       zIndex.set(1);
@@ -158,11 +190,20 @@
     }
 
     // calculate potential drop index
-    dropOrderId = unplace([x, y], templateDimension, [0, orderedIds.length]);
+    dropOrderId = unplace({
+      position: [x, y],
+      dimension: templateDimension,
+      containerDimension,
+      scrollPosition: $scrollPos,
+      length: data.length,
+    });
 
     // bring the marker to the potential drop position
     if (markerRef) {
-      const [x, y] = place(dropOrderId, templateDimension);
+      const [x, y] = place({
+        dragItemIndex: dropOrderId,
+        dimension: templateDimension,
+      });
       markerRef.style.transform = `translate(${x}px, ${y}px)`;
     }
 
@@ -179,7 +220,10 @@
 
     // move other items around
     orderedIds.forEach((id, i) => {
-      const [x, y] = place(i, templateDimension);
+      const [x, y] = place({
+        dragItemIndex: i,
+        dimension: templateDimension,
+      });
 
       const { pos } = itemPoses[id];
       pos.set({
@@ -201,22 +245,6 @@
 
     scrollPos.set([x, y]);
   };
-
-  const handleAutoScroll = ([x, y]) => {
-    if (!containerRef) return;
-    containerRef.scrollTop = y;
-    containerRef.scrollLeft = x;
-  };
-
-  $: isDragging = draggingIds.length > 0;
-  $: handleAutoScroll($scrollPos);
-
-  $: offsetPos = containerDimension
-    ? ([
-        containerDimension.left - $scrollPos[0],
-        containerDimension.top - $scrollPos[1],
-      ] as const)
-    : ([0, 0] as const);
 </script>
 
 <svelte:window on:scroll={handleWindowScroll} />
@@ -224,6 +252,7 @@
   {#if ready}
     <div
       class="scroll-wrapper"
+      style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
       on:dragstart={handleDragStart}
       on:dragend={handleDragEnd}
       on:dragover|preventDefault={() => null}
@@ -279,8 +308,6 @@
 
   .scroll-wrapper {
     position: relative;
-    width: 100%;
-    height: 100vh;
   }
 
   .offscreen-measurer {

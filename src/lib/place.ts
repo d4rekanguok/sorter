@@ -1,21 +1,50 @@
-export const place = (
-  i: number,
-  dimension: [number, number],
-  prev?: any
-): [number, number] => {
+interface PlaceArgs {
+  dragItemIndex: number
+  dimension: [number, number]
+}
+
+export const place = ({
+  dragItemIndex,
+  dimension
+}: PlaceArgs): [number, number] => {
   const [w, h] = dimension
-  const y = h * i
+  const y = h * dragItemIndex
   return [0, y]
 }
 
-export const unplace = (
-  position: [number, number], 
-  dimension: [number, number], 
-  bound: [number, number]
-): number => {
-  const [x, y] = position
-  const [w, h] = dimension
-  const [start, end] = bound
+interface UnplaceArgs {
+  position: [number, number]
+  dimension: [number, number]
+  containerDimension: DOMRect,
+  scrollPosition: [number, number]
+  /* data length */
+  length: number
+}
+
+export const unplace = ({
+  position, 
+  dimension,
+  containerDimension, 
+  scrollPosition,
+  length
+}: UnplaceArgs): number => {
+  const y = position[1]
+  const h = dimension[1]
+  const offsetY = scrollPosition[1]
+
+  const start = Math.ceil(offsetY / h);
+  const end = Math.min(length, Math.floor(
+    (offsetY + containerDimension.height) / h
+  ))
+
   const i = Math.round(y / h)
   return Math.max(start, Math.min(end, i))
+} 
+
+export const getContainerMaxDimension = (
+  length: number,
+  templateDimension: [number, number]
+): [number, number] => {
+  const [w, h] = templateDimension
+  return [w, h * length];
 }
