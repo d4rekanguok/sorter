@@ -40,6 +40,8 @@
   let dropOrderId: number = 0;
 
   let dragCompleted = true;
+  /* use a timer to keep track of */
+  let timer = null;
 
   type PosStore = Record<"x" | "y" | "rotate", number>;
 
@@ -84,7 +86,9 @@
   });
 
   const handleDragStart = (e) => {
+    clearTimeout(timer);
     dragCompleted = false;
+
     orderedIds = data.map((item) => item[identifier]);
     const itemEl = e.target as HTMLElement;
     if (!itemEl) return;
@@ -119,10 +123,11 @@
       data.findIndex((item) => item[identifier] === id)
     );
 
+    dragCompleted = true;
+
     /* how can we reduce duplicate reset work & avoid using setTimeout? */
-    setTimeout(() => {
+    timer = setTimeout(() => {
       draggingIds = [];
-      dragCompleted = true;
 
       dispatch("dragend", {
         from: draggingIndexes,
