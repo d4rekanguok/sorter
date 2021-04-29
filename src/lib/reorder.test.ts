@@ -25,6 +25,14 @@ test('reorder multiple items with backward orders', () => {
   assert.equal(reorder(array, from, to), ['A', 'C', 'E', 'G', 'D', 'B', 'F'] )
 })
 
+test('reorder multiple items with random orders > 10', () => {
+  const array = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+  const from = [3, 1, 10]
+  const to = 4
+  // ['A', 'C', 'E', 'F', 'D', 'B', 'K', 'G', 'H', 'I', 'J', 'L']
+  assert.equal(reorder(array, from, to), ['A', 'C', 'E', 'F', 'D', 'B', 'K', 'G', 'H', 'I', 'J', 'L'] )
+})
+
 test('reorder faulty items', () => {
   const array = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
   const from = [3, 100]

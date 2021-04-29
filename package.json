@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "test:file": "node -r esm -r ts-node/register"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "next",

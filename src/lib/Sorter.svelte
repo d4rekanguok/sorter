@@ -148,7 +148,9 @@
     const order = +item.dataset.order;
 
     const selectedIndexes = selectedIds.map((id) => orderedIds.indexOf(id));
-    const draggingIndexes = [...new Set([order].concat(selectedIndexes))];
+    const draggingIndexes = [...new Set([order].concat(selectedIndexes))].sort(
+      (a, b) => a - b
+    );
     draggingIds = removeItemsFromArray(orderedIds, draggingIndexes);
     orderedIds = orderedIds;
   };
@@ -176,10 +178,9 @@
       data.findIndex((item) => item[identifier] === id)
     );
 
-    dragCompleted = true;
-
     /* how can we reduce duplicate reset work & avoid using setTimeout? */
     timer = setTimeout(() => {
+      dragCompleted = true;
       draggingIds = [];
 
       dispatch("dragend", {
