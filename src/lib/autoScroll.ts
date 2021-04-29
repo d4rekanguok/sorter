@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store'
+import type { Readable } from 'svelte/store'
 
 //Rectangle [x     , y     , w     , h     ]
 type Rect = [number, number, number, number]
@@ -56,6 +57,7 @@ export const detectScrollZone = (
 }
 
 export const createAutoScrollStore = () => {
+  let _bound: Rect = [0, 0, 0, 0]
   let timer = null
   const { subscribe, update, set } = writable<[number, number]>([0, 0])
 
@@ -77,14 +79,20 @@ export const createAutoScrollStore = () => {
     })
   }
 
-  const move = ({ direction, axis, delta, bound }: MoveArgs) => {
+  const updateBound = (newBound: Rect) => {
+    _bound = newBound
+  }
+
+  const move = ({ direction, axis, delta }: MoveArgs) => {
     let id = axis === 'x' ? 0 : 1
     let change = delta * direction
-  
+
+
     return update(scrollPos => {
       const nextScrollPos = (scrollPos.slice()) as Point
       nextScrollPos[id] += change
-      if (isOverlapped(nextScrollPos, bound)) {
+
+      if (isOverlapped(nextScrollPos, _bound)) {
         return nextScrollPos
       } else {
         return scrollPos
@@ -94,6 +102,7 @@ export const createAutoScrollStore = () => {
 
   return {
     subscribe,
+    updateBound,
     start,
     stop,
     set,

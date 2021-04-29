@@ -67,6 +67,7 @@
   const setPositionAll = (
     data,
     templateDimension,
+    containerDimension,
     place,
     identifier
   ): Record<string, { pos: Spring<PosStore>; zIndex: Writable<number> }> => {
@@ -76,6 +77,7 @@
         ? place({
             dragItemIndex: i,
             dimension: templateDimension,
+            containerDimension,
           })
         : [0, 0];
 
@@ -88,7 +90,13 @@
     }, {});
   };
 
-  $: itemPoses = setPositionAll(data, templateDimension, place, identifier);
+  $: itemPoses = setPositionAll(
+    data,
+    templateDimension,
+    containerDimension,
+    place,
+    identifier
+  );
 
   const handleAutoScroll = ([x, y]) => {
     if (!containerRef) return;
@@ -98,7 +106,6 @@
 
   $: isDragging = draggingIds.length > 0;
   $: handleAutoScroll($scrollPos);
-  $: console.log({ containerDimension, templateDimension });
 
   $: if (containerDimension && templateDimension && data) {
     offsetPos = [
@@ -106,7 +113,16 @@
       containerDimension.top - $scrollPos[1],
     ];
 
-    maxDimension = getContainerMaxDimension(data.length, templateDimension);
+    maxDimension = getContainerMaxDimension(
+      data.length,
+      templateDimension,
+      // @ts-expect-error
+      containerDimension
+    );
+
+    const maxScrollX = Math.max(0, maxDimension[0] - containerDimension.width);
+    const maxScrollY = Math.max(0, maxDimension[1] - containerDimension.height);
+    scrollPos.updateBound([0, 0, maxScrollX, maxScrollY]);
   }
 
   const dispatch = createEventDispatcher();
@@ -149,6 +165,7 @@
       const [x, y] = place({
         dragItemIndex: i,
         dimension: templateDimension,
+        containerDimension,
       });
       const { zIndex, pos } = itemPoses[id];
       pos.set({ x, y, rotate: 0 });
@@ -187,9 +204,7 @@
       20
     );
 
-    autoScroll({ axis, direction, scrollPos, bound: [
-      0, 0, ...maxDimension
-    ] });
+    autoScroll({ axis, direction, scrollPos });
 
     // calculate potential drop index
     dropOrderId = unplace({
@@ -205,6 +220,7 @@
       const [x, y] = place({
         dragItemIndex: dropOrderId,
         dimension: templateDimension,
+        containerDimension,
       });
       markerRef.style.transform = `translate(${x}px, ${y}px)`;
     }
@@ -225,6 +241,7 @@
       const [x, y] = place({
         dragItemIndex: i,
         dimension: templateDimension,
+        containerDimension,
       });
 
       const { pos } = itemPoses[id];

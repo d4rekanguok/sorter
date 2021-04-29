@@ -5,6 +5,7 @@
   import DemoSimple from "./components/DemoSimple.svelte";
   import DemoMultipleSelect from "./components/DemoMultipleSelect.svelte";
   import DemoHorizontalSelect from "./components/DemoHorizontalSelect.svelte";
+  import DemoScanlineSelect from "./components/DemoScanlineSelect.svelte";
 
   interface Data {
     id: string;
@@ -61,6 +62,22 @@
     <DemoHorizontalSelect initialData={data} slot="sorter" />
     <svelte:fragment slot="desc">
       <h1>Horizontal</h1>
+      <pre>
+        {
+`<Sorter
+  on:dragend={handleDragEnd}
+  template={DemoTemplate}
+  {data}
+/>`
+        }
+      </pre>
+    </svelte:fragment>
+  </DemoWrapper>
+
+  <DemoWrapper layout="stack">
+    <DemoScanlineSelect initialData={data} slot="sorter" />
+    <svelte:fragment slot="desc">
+      <h1>Scan Line</h1>
       <pre>
         {
 `<Sorter

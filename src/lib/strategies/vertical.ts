@@ -50,9 +50,9 @@ export const getContainerMaxDimension = (
   return [w, h * length];
 }
 
-export const autoScroll = ({ axis, direction, scrollPos, bound }) => {
+export const autoScroll = ({ axis, direction, scrollPos }) => {
   if (axis === "y" && direction !== 0) {
-    scrollPos.start({ direction, axis, delta: 3, bound });
+    scrollPos.start({ direction, axis, delta: 3 });
   } else {
     scrollPos.stop();
   }
