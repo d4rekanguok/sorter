@@ -20,6 +20,7 @@
   export let data: any[] = [];
   export let selectedIds: Array<string | number> = [];
   export let template = null;
+  export let templateProps = {};
   export let identifier = "id";
   export let strategy = strategyVertical;
   export let measureTemplateSize = defaultTemplateMeasurer;
@@ -302,6 +303,7 @@
             isDragging={draggingIds.includes(item[identifier])}
             isSelected={selectedIds.includes(item[identifier])}
             on:select
+            {...templateProps}
           />
         </DragWrapper>
       {/each}

@@ -1,6 +1,7 @@
 <script lang="ts">
   export let order = 0;
   export let isDragging = false;
+  export let foo = "baz";
   export let item = {
     value: "black",
     label: "Black",
@@ -11,6 +12,7 @@
   <span class="number">{order + 1}</span>
   <span>
     {item.label}
+    {foo}
   </span>
 </div>
 

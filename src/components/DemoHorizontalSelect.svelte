@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Sorter, { reorder } from "../lib/Sorter.svelte";
+  import { Sorter, reorder } from "../lib";
   import DemoTemplateSelect from "./DemoTemplateHorizontal.svelte";
   import strategy from "../lib/strategies/horizontal";
 

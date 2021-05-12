@@ -12,7 +12,12 @@
 </script>
 
 <div class="demo-wrapper">
-  <Sorter on:dragend={handleDragEnd} template={DemoTemplate} {data} />
+  <Sorter
+    on:dragend={handleDragEnd}
+    template={DemoTemplate}
+    {data}
+    templateProps={{ foo: "bar" }}
+  />
 </div>
 
 <style>
