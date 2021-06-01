@@ -23,7 +23,7 @@ export const setMarkerStyle = () => {
 }
 
 export const unplace = ({
-  position, 
+  position,
   dimension,
   containerDimension, 
   scrollPosition,

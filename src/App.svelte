@@ -2,13 +2,15 @@
   import colors from "css-color-names";
   import { nanoid } from "nanoid";
 
-  import Sorter from "./lib/SorterNext.svelte";
+  import Drag from "./lib/Drag.svelte";
   import DragItem from "./lib/DragItem.svelte";
+  import DragIndicator from "./lib/DragIndicator.svelte";
+
+  import { reorder } from "./lib/reorder";
 
   interface Data {
     id: string;
     value: string;
-    label: string;
   }
 
   let data: Data[] = Object.keys(colors)
@@ -16,22 +18,38 @@
     .map((color) => ({
       id: nanoid(6),
       value: color,
-      label: color,
     }));
+
+  const handleDragEnd = ({ detail }) => {
+    const { dragIds, dropIndex } = detail;
+    reorder(data, dragIds, dropIndex);
+    data = data;
+  };
+
+  const handleAdd = () => {
+    data.push({
+      id: nanoid(6),
+      value: Object.keys(colors)[data.length],
+    });
+    data = data;
+  };
 </script>
 
 <main
   on:dragover|preventDefault={() => null}
   on:drop|preventDefault={() => null}
 >
-  <Sorter itemDimension={[100, 30]}>
+  <Drag itemDimension={[100, 30]} on:dragend={handleDragEnd}>
     {#each data as item, index (item.id)}
-      <DragItem {index}>{item.value}</DragItem>
+      <DragItem {index}>
+        <div class="item" style="--color: {item.value};">{item.value}</div>
+      </DragItem>
     {/each}
+    <DragIndicator />
     <DragItem index={data.length} draggable={false}>
-      <button>A button</button>
+      <button on:click={handleAdd}>A button</button>
     </DragItem>
-  </Sorter>
+  </Drag>
 </main>
 
 <style>
@@ -49,5 +67,13 @@
     margin: 0 auto;
     padding: 8rem 0;
     max-width: 60rem;
+  }
+
+  .item {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background-color: var(--color);
   }
 </style>

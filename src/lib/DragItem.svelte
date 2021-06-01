@@ -1,7 +1,6 @@
 <script>
   import { getContext } from "svelte";
   import { spring } from "svelte/motion";
-  import { setDataImage } from "./domHelpers";
   import { key } from "./context";
 
   export let index = 0;
@@ -10,79 +9,75 @@
   let nextIndex = index;
 
   let isDragging = false;
+  let offset = [0, 0];
+  let _dragIds = [];
 
-  const pos = spring({ x: 0, y: 0 });
-
-  $: pos.set({
-    x: 0,
-    y: nextIndex * $meta.itemDimension[1],
-  });
+  const pos = spring([0, 0]);
+  const { store, dragEnd } = getContext(key);
 
   $: {
-    const { dragIds } = $meta;
-    const offset = dragIds.reduce((acc, cur) => {
-      if (nextIndex > cur) return ++acc;
-      return acc;
-    }, 0);
+    const { dragIds } = $store;
+    if (_dragIds[0] !== dragIds[0]) {
+      _dragIds = dragIds;
+      const offset = dragIds.reduce((acc, cur) => {
+        if (nextIndex > cur) return ++acc;
+        return acc;
+      }, 0);
 
-    nextIndex = nextIndex - offset;
+      nextIndex = nextIndex - offset;
+    }
+
+    if (nextIndex !== index) {
+      nextIndex = index;
+    }
   }
 
-  const meta = getContext(key);
+  $: {
+    if (isDragging) {
+      pos.set($store.pos.map((v, i) => v - offset[i]));
+    } else {
+      pos.set([0, nextIndex * $store.itemDimension[1]]);
+    }
+  }
 
-  const handleDragStart = (e) => {
-    setDataImage(e);
-    console.log("dragstart");
+  const handleMouseDown = (e) => {
+    if (!draggable) return;
 
-    // tell other items which ids are being dragged
-    meta.update((store) => {
-      store.dragIds.push(index);
-      return store;
-    });
+    const { offsetX, offsetY } = e;
+    offset = [offsetX, offsetY];
+
+    store.drag(index);
+
     isDragging = true;
+
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
-  const handleDrag = (e) => {
-    console.log("dragging");
-
-    const { clientX, clientY } = e;
-    const { left: offsetX, top: offsetY } = $meta.wd;
-
-    pos.set({
-      x: clientX - offsetX,
-      y: clientY - offsetY,
-    });
-  };
-
-  const handleDragEnd = () => {
+  const handleMouseUp = (e) => {
     console.log("dragend");
 
-    pos.set({
-      x: 0,
-      y: nextIndex * $meta.itemDimension[1],
-    });
-    meta.update((store) => {
-      store.dragIds = [];
-      return store;
-    });
+    offset = [0, 0];
     isDragging = false;
+    document.removeEventListener("mouseup", handleMouseUp);
+
+    dragEnd();
   };
+
+  $: console.log(nextIndex, index);
 </script>
 
-{#if $meta.ready}
+{#if $store.ready}
   <div
-    {draggable}
-    on:dragstart={handleDragStart}
-    on:dragend={handleDragEnd}
-    on:drag|stopPropagation={handleDrag}
+    on:mousedown|preventDefault|stopPropagation={handleMouseDown}
+    on:dragstart|preventDefault|stopPropagation={() => null}
     on:drop|preventDefault={() => null}
     on:dragover|preventDefault={() => null}
     class="drag-item"
     style={`
-  width: ${$meta.itemDimension[0]}px;
-  height: ${$meta.itemDimension[1]}px;
+  width: ${$store.itemDimension[0]}px;
+  height: ${$store.itemDimension[1]}px;
   position: ${isDragging ? "fixed" : "absolute"};
-  transform: translate(${$pos.x}px, ${$pos.y}px);
+  transform: translate(${$pos[0]}px, ${$pos[1]}px);
 `}
   >
     <div class="debug-index">{nextIndex}</div>
@@ -101,5 +96,6 @@
     position: absolute;
     left: -2rem;
     opacity: 0.4;
+    pointer-events: none;
   }
 </style>
