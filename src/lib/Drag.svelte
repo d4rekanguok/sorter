@@ -29,12 +29,23 @@
     dragEnd,
   });
 
+  onMount(() => {
+    store.update((store) => {
+      if (!ref) return store;
+
+      store.wd = ref.getBoundingClientRect();
+      store.itemDimension = itemDimension;
+      store.ready = true;
+
+      return store;
+    });
+  });
+
   const handleMove = (e) => {
     const { clientX, clientY } = e;
     store.update((store) => {
       const { wd } = store;
       const { left: offsetX, top: offsetY } = wd;
-
       const x = clientX - offsetX;
       const y = clientY - offsetY;
 
@@ -52,21 +63,20 @@
     });
   };
 
-  onMount(() => {
+  const handleScroll = () => {
     store.update((store) => {
-      if (!ref) return store;
-
       store.wd = ref.getBoundingClientRect();
-      store.itemDimension = itemDimension;
-      store.ready = true;
-
       return store;
     });
-  });
+  };
 </script>
 
-<svelte:window on:mousemove={handleMove} />
-<div>{$store.pos.join(" | ")}</div>
+<svelte:window on:mousemove={handleMove} on:scroll={handleScroll} />
+<div style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
+  {$store.pos.join(" | ")}
+  <br />
+  {$store.wd?.left} | {$store.wd?.top}
+</div>
 <div
   bind:this={ref}
   class="wrapper"
@@ -81,6 +91,5 @@
     position: relative;
     width: 100%;
     height: 100vh;
-    background-color: white;
   }
 </style>

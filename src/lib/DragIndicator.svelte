@@ -12,7 +12,9 @@
   style={`
     position: relative;
     pointer-events: none;
+    z-index: 5;
     transform: translate(0px, ${y}px);
+    opacity: ${$store.isDragging ? 1 : 0};
 `}
 >
   <slot>
@@ -26,6 +28,5 @@
     width: 100%;
     background-color: tomato;
     height: 2px;
-    z-index: 1000;
   }
 </style>

@@ -6,18 +6,22 @@
   export let index = 0;
   export let draggable = true;
 
+  /** @type {number} temporary index while in drag state */
   let nextIndex = index;
 
-  let isDragging = false;
+  let isBeingDragged = false;
   let offset = [0, 0];
   let _dragIds = [];
 
-  const pos = spring([0, 0]);
+  const pos = spring([0, 0], {
+    stiffness: 0.1,
+    damping: 0.4,
+  });
   const { store, dragEnd } = getContext(key);
 
   $: {
     const { dragIds } = $store;
-    if (_dragIds[0] !== dragIds[0]) {
+    if (_dragIds.join("") !== dragIds.join("")) {
       _dragIds = dragIds;
       const offset = dragIds.reduce((acc, cur) => {
         if (nextIndex > cur) return ++acc;
@@ -27,14 +31,18 @@
       nextIndex = nextIndex - offset;
     }
 
-    if (nextIndex !== index) {
+    if (nextIndex !== index && !$store.isDragging) {
       nextIndex = index;
     }
   }
 
   $: {
-    if (isDragging) {
-      pos.set($store.pos.map((v, i) => v - offset[i]));
+    if (isBeingDragged) {
+      pos.set(
+        $store.pos.map(
+          (v, i) => v - offset[i] - (i === 0 ? window.scrollX : window.scrollY)
+        )
+      );
     } else {
       pos.set([0, nextIndex * $store.itemDimension[1]]);
     }
@@ -42,13 +50,12 @@
 
   const handleMouseDown = (e) => {
     if (!draggable) return;
-
     const { offsetX, offsetY } = e;
     offset = [offsetX, offsetY];
 
-    store.drag(index);
+    isBeingDragged = true;
 
-    isDragging = true;
+    store.drag(index);
 
     document.addEventListener("mouseup", handleMouseUp);
   };
@@ -57,13 +64,11 @@
     console.log("dragend");
 
     offset = [0, 0];
-    isDragging = false;
+    isBeingDragged = false;
     document.removeEventListener("mouseup", handleMouseUp);
 
     dragEnd();
   };
-
-  $: console.log(nextIndex, index);
 </script>
 
 {#if $store.ready}
@@ -76,7 +81,8 @@
     style={`
   width: ${$store.itemDimension[0]}px;
   height: ${$store.itemDimension[1]}px;
-  position: ${isDragging ? "fixed" : "absolute"};
+  position: ${isBeingDragged ? "fixed" : "absolute"};
+  z-index: ${isBeingDragged ? "10" : "1"};
   transform: translate(${$pos[0]}px, ${$pos[1]}px);
 `}
   >

@@ -39,10 +39,17 @@
   on:dragover|preventDefault={() => null}
   on:drop|preventDefault={() => null}
 >
-  <Drag itemDimension={[100, 30]} on:dragend={handleDragEnd}>
+  <pre
+    style="white-space: pre-wrap;">
+    {data.map(v => v.value).join(', ')}
+  </pre>
+  <Drag itemDimension={[250, 45]} on:dragend={handleDragEnd}>
     {#each data as item, index (item.id)}
       <DragItem {index}>
-        <div class="item" style="--color: {item.value};">{item.value}</div>
+        <div class="item" style="--color: {item.value};">
+          <div>{item.value}</div>
+          <button on:click={() => alert(item.value)}>Select</button>
+        </div>
       </DragItem>
     {/each}
     <DragIndicator />
@@ -72,8 +79,23 @@
   .item {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 40px;
+    display: flex;
+    padding: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
     border-radius: 4px;
-    background-color: var(--color);
+    background-color: white;
+    border-left: 8px solid var(--color);
+  }
+
+  .item button {
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    opacity: 0.8;
   }
 </style>
