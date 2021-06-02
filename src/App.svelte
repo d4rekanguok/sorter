@@ -5,8 +5,8 @@
   import Drag from "./lib/Drag.svelte";
   import DragItem from "./lib/DragItem.svelte";
   import DragIndicator from "./lib/DragIndicator.svelte";
-
   import { reorder } from "./lib/reorder";
+  import Template from "./components/Template.svelte";
 
   interface Data {
     id: string;
@@ -45,11 +45,8 @@
   </pre>
   <Drag itemDimension={[250, 45]} on:dragend={handleDragEnd}>
     {#each data as item, index (item.id)}
-      <DragItem {index}>
-        <div class="item" style="--color: {item.value};">
-          <div>{item.value}</div>
-          <button on:click={() => alert(item.value)}>Select</button>
-        </div>
+      <DragItem {index} let:isDragging>
+        <Template {item} {isDragging} />
       </DragItem>
     {/each}
     <DragIndicator />
@@ -66,7 +63,7 @@
   }
 
   :global(body) {
-    background-color: aliceblue;
+    background-color: rgb(219, 227, 235);
   }
 
   main {
@@ -74,28 +71,5 @@
     margin: 0 auto;
     padding: 8rem 0;
     max-width: 60rem;
-  }
-
-  .item {
-    position: relative;
-    width: 100%;
-    height: 40px;
-    display: flex;
-    padding: 0.5rem;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 4px;
-    background-color: white;
-    border-left: 8px solid var(--color);
-  }
-
-  .item button {
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-size: 0.8em;
-    opacity: 0.8;
   }
 </style>

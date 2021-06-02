@@ -87,7 +87,7 @@
 `}
   >
     <div class="debug-index">{nextIndex}</div>
-    <slot />
+    <slot isDragging={isBeingDragged} />
   </div>
 {/if}
 
