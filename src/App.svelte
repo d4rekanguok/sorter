@@ -43,8 +43,13 @@
     data = data;
   };
 
-  const handleAdd = () => {
-    data.push({
+  const handleAdd = ({ detail }) => {
+    let idx = data.length;
+    if (detail.id) {
+      idx = data.findIndex((item) => item.id === detail.id) + 1;
+    }
+
+    data.splice(idx, 0, {
       id: nanoid(6),
       value: Object.keys(colors)[data.length],
     });
@@ -76,6 +81,7 @@
           {isDragging}
           isSelected={selected.has(item.id)}
           on:select={handleSelect}
+          on:add={handleAdd}
         />
       </DragItem>
     {/each}

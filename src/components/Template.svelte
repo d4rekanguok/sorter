@@ -13,12 +13,21 @@
       isSelected: e.target.checked,
     });
 
+  const addHandler = () => {
+    dispatch("add", {
+      id: item.id,
+    });
+  };
+
   const { value } = item;
 </script>
 
 <div class="item" style="--color: {value};" class:isDragging>
   <div>{value}</div>
   <input type="checkbox" checked={isSelected} on:change={changeHandler} />
+  <div class="btn-add">
+    <button on:click={addHandler}>Add</button>
+  </div>
 </div>
 
 <style>
@@ -33,6 +42,34 @@
     border-radius: 4px;
     background-color: white;
     border-left: 8px solid var(--color);
+  }
+
+  .item:hover .btn-add {
+    display: block;
+  }
+
+  .item.isDragging:hover .btn-add {
+    display: none;
+  }
+
+  .btn-add {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 10%);
+  }
+
+  .btn-add button {
+    border: none;
+    background: pink;
+    color: white;
+    border-radius: 1000px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0.25em 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   .item.isDragging {
