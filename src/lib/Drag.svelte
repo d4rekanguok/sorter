@@ -1,7 +1,7 @@
 <script>
   import { setContext, onMount, createEventDispatcher } from "svelte";
 
-  import { key, createStore } from "./context";
+  import { key, createStore, StateNames } from "./context";
   import { unplace } from "./strategies/vertical";
 
   const dispatch = createEventDispatcher();
@@ -18,10 +18,10 @@
     dispatch("dragend", {
       cancelled: false,
       dropIndex,
-      dragIds: Array.from(dragIds),
+      dragIds: Array.from(dragIds).sort((a, b) => a - b),
     });
 
-    store.transition("idle");
+    store.transit(StateNames.idle);
   };
 
   setContext(key, {

@@ -1,7 +1,7 @@
 <script>
   import { getContext } from "svelte";
   import { spring } from "svelte/motion";
-  import { key } from "./context";
+  import { key, StateNames } from "./context";
   import { isEqualSet } from "./compare-set";
 
   export let index = 0;
@@ -15,12 +15,17 @@
   let offset = [0, 0];
   let _dragIds = new Set();
 
-  const pos = spring([0, 0], {
+  const pos = spring(null, {
     stiffness: 0.1,
     damping: 0.4,
   });
 
   const { store, dragEnd } = getContext(key);
+
+  store.onTransit(StateNames.dragging, (store) => {
+    if (!isSelected) return;
+    store.selectedIds.add(index);
+  });
 
   $: {
     const { dragIds } = $store;
@@ -36,13 +41,13 @@
       nextIndex = nextIndex - offset;
     }
 
-    if (nextIndex !== index && $store.state === "idle") {
+    if (nextIndex !== index && $store.state === StateNames.idle) {
       nextIndex = index;
     }
   }
 
   $: {
-    if ($store.state === "dragging" && (isBeingDragged || isSelected)) {
+    if ($store.state === StateNames.dragging && $store.dragIds.has(index)) {
       pos.set(
         $store.pos.map(
           (v, i) => v - offset[i] - (i === 0 ? window.scrollX : window.scrollY)
@@ -61,7 +66,7 @@
       const { offsetX, offsetY } = e;
       offset = [offsetX, offsetY];
       isBeingDragged = true;
-      store.transition("dragging", { dragId: index });
+      store.transit(StateNames.dragging, { dragId: index });
 
       document.addEventListener("mouseup", handleMouseUp);
     } catch (e) {
