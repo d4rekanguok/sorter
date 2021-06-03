@@ -17,6 +17,7 @@
     stiffness: 0.1,
     damping: 0.4,
   });
+
   const { store, dragEnd } = getContext(key);
 
   $: {
@@ -48,16 +49,20 @@
     }
   }
 
-  const handleMouseDown = (e) => {
-    if (!draggable) return;
-    const { offsetX, offsetY } = e;
-    offset = [offsetX, offsetY];
+  const handleMouseDown = async (e) => {
+    if (!draggable || e.button === 2) return;
 
-    isBeingDragged = true;
+    try {
+      await drag(10);
+      const { offsetX, offsetY } = e;
+      offset = [offsetX, offsetY];
+      isBeingDragged = true;
+      store.drag(index);
 
-    store.drag(index);
-
-    document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("mouseup", handleMouseUp);
+    } catch (e) {
+      return;
+    }
   };
 
   const handleMouseUp = (e) => {
@@ -69,6 +74,27 @@
 
     dragEnd();
   };
+
+  const drag = (limit = 10) =>
+    new Promise((res, rej) => {
+      let currentPos;
+      const unsub = store.subscribe(({ pos }) => {
+        if (!currentPos) {
+          currentPos = [...pos];
+          return;
+        }
+
+        const [cx, cy] = pos;
+        const [mx, my] = currentPos;
+        const distance = Math.sqrt(Math.pow(cx - mx, 2) + Math.pow(cy - my, 2));
+        if (distance >= limit) {
+          unsub();
+          res(distance);
+        }
+      });
+
+      setTimeout(() => rej(null), 100);
+    });
 </script>
 
 {#if $store.ready}

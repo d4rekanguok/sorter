@@ -2,29 +2,31 @@ import { writable } from "svelte/store";
 
 export const key = Symbol('Sorter');
 
+/**
+ * @typedef DragStore
+ * @type {object}
+ * @property {DOMRect} wd - wrapperDimension
+ * @property {[number, number]} itemDimension - width & height element dimension
+ * @property {boolean} ready
+ * @property {boolean} isDragging
+ * @property {string[]} dragIds - indexes of elements being dragged
+ * @property {[number, number]} pos - cursor position relative to scroll pos / dom
+ * @property {null | number} dropIndex - calculated drop index during drag. Null when nothing is being dragged.
+ */
+
 export const createStore = () => {
-  const { subscribe, update } = writable({
-    /** @type {DOMRect} wrapperDimension */
+  /** @type {DragStore} */
+  const initialStore = {
     wd: null,
-  
-    /** @type {number[]} */
     itemDimension: [0, 0],
-  
-    /** @type {boolean} */
     ready: false,
-  
-    /** @type {boolean} */
     isDragging: false,
-  
-    /** @type {string[]} indexes of elements being dragged */
     dragIds: [],
-  
-    /** @type {number[]} cursor position relative to scroll pos / dom */
     pos: [0, 0],
-  
-    /** @type {null | number} next drop index. Null when nothing is being dragged. */
     dropIndex: null,
-  });
+  }
+
+  const { subscribe, update } = writable(initialStore);
   
   const drag = (dragId) => update((store) => {
     store.dragIds = [dragId]
