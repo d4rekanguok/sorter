@@ -14,6 +14,7 @@
   let isBeingDragged = false;
   let offset = [0, 0];
   let _dragIds = new Set();
+  let _abortDragPromise = null;
 
   const pos = spring(null, {
     stiffness: 0.1,
@@ -62,7 +63,11 @@
     if (!draggable || e.button === 2) return;
 
     try {
-      await store.dragUntil(10);
+      const { abort, promise } = store.dragUntil(10);
+      _abortDragPromise = abort;
+      document.addEventListener("mouseup", handleMouseUpAbort);
+      await promise;
+
       const { offsetX, offsetY } = e;
       offset = [offsetX, offsetY];
       isBeingDragged = true;
@@ -72,6 +77,11 @@
     } catch (e) {
       return;
     }
+  };
+
+  const handleMouseUpAbort = () => {
+    if (_abortDragPromise) _abortDragPromise();
+    document.removeEventListener("mouseup", handleMouseUpAbort);
   };
 
   const handleMouseUp = () => {

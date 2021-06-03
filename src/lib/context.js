@@ -98,13 +98,19 @@ export const createStore = () => {
    * @param {number} limit - drag distance (px)
    * @returns {Promise<number>}
    */
-  const dragUntil = (limit = 10) =>
-    new Promise((res, rej) => {
+  const dragUntil = (limit = 10) => {
+    let abort = false;
+    const promise = new Promise((res, rej) => {
       let currentPos;
       const unsub = subscribe(({ pos }) => {
         if (!currentPos) {
           currentPos = [...pos];
           return;
+        }
+
+        if (abort) {
+          console.log('Aborted!')
+          rej();
         }
 
         const [cx, cy] = pos;
@@ -115,9 +121,15 @@ export const createStore = () => {
           res(distance);
         }
       });
-
-      setTimeout(() => rej(null), 150);
     });
+
+    return {
+      promise,
+      abort: () => {
+        abort = true;
+      },
+    };
+  };
 
   const subscribeAll = (...args) => {
     const unsub = subscribe(...args);
