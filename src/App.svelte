@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import colors from "css-color-names";
   import { nanoid } from "nanoid";
 
@@ -8,17 +8,34 @@
   import { reorder } from "./lib/reorder";
   import Template from "./components/Template.svelte";
 
-  interface Data {
-    id: string;
-    value: string;
-  }
+  /**
+   * @typedef Data
+   * @type {object}
+   * @property {string} id
+   * @property {string} value
+   */
 
-  let data: Data[] = Object.keys(colors)
-    .filter((_, i) => i < 20)
+  /** @type {Data[]} */
+  let data = Object.keys(colors)
+    .filter((_, i) => i < 10)
     .map((color) => ({
       id: nanoid(6),
       value: color,
     }));
+
+  /** @type {Set<string>} */
+  let selected = new Set();
+
+  const handleSelect = ({ detail }) => {
+    const { id, isSelected } = detail;
+    console.log(id, isSelected);
+    if (isSelected) {
+      selected.add(id);
+    } else {
+      selected.delete(id);
+    }
+    selected = selected;
+  };
 
   const handleDragEnd = ({ detail }) => {
     const { dragIds, dropIndex } = detail;
@@ -41,12 +58,22 @@
 >
   <pre
     style="white-space: pre-wrap;">
+    {Array.from(selected).map(id => data.find(item => item.id === id).value).join(', ')}
+  </pre>
+
+  <pre
+    style="white-space: pre-wrap;">
     {data.map(v => v.value).join(', ')}
   </pre>
   <Drag itemDimension={[250, 45]} on:dragend={handleDragEnd}>
     {#each data as item, index (item.id)}
       <DragItem {index} let:isDragging>
-        <Template {item} {isDragging} />
+        <Template
+          {item}
+          {isDragging}
+          isSelected={selected.has(item.id)}
+          on:select={handleSelect}
+        />
       </DragItem>
     {/each}
     <DragIndicator />

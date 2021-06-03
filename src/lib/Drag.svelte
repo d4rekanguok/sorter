@@ -21,7 +21,7 @@
       dragIds,
     });
 
-    store.reset();
+    store.transition("idle");
   };
 
   setContext(key, {

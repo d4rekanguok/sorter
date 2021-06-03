@@ -1,13 +1,24 @@
 <script>
+  import { createEventDispatcher } from "svelte";
+
   export let item = {};
   export let isDragging = false;
+  export let isSelected = false;
+
+  const dispatch = createEventDispatcher();
+
+  const changeHandler = (e) =>
+    dispatch("select", {
+      id: item.id,
+      isSelected: e.target.checked,
+    });
 
   const { value } = item;
 </script>
 
 <div class="item" style="--color: {value};" class:isDragging>
   <div>{value}</div>
-  <button on:click={() => alert(value)}>Select</button>
+  <input type="checkbox" checked={isSelected} on:change={changeHandler} />
 </div>
 
 <style>
@@ -22,16 +33,6 @@
     border-radius: 4px;
     background-color: white;
     border-left: 8px solid var(--color);
-  }
-
-  .item button {
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-size: 0.8em;
-    opacity: 0.8;
   }
 
   .item.isDragging {

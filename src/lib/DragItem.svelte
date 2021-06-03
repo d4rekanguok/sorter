@@ -53,11 +53,11 @@
     if (!draggable || e.button === 2) return;
 
     try {
-      await drag(10);
+      await store.dragUntil(10);
       const { offsetX, offsetY } = e;
       offset = [offsetX, offsetY];
       isBeingDragged = true;
-      store.drag(index);
+      store.transition("dragging", { dragId: index });
 
       document.addEventListener("mouseup", handleMouseUp);
     } catch (e) {
@@ -65,36 +65,12 @@
     }
   };
 
-  const handleMouseUp = (e) => {
-    console.log("dragend");
-
+  const handleMouseUp = () => {
     offset = [0, 0];
     isBeingDragged = false;
     document.removeEventListener("mouseup", handleMouseUp);
-
     dragEnd();
   };
-
-  const drag = (limit = 10) =>
-    new Promise((res, rej) => {
-      let currentPos;
-      const unsub = store.subscribe(({ pos }) => {
-        if (!currentPos) {
-          currentPos = [...pos];
-          return;
-        }
-
-        const [cx, cy] = pos;
-        const [mx, my] = currentPos;
-        const distance = Math.sqrt(Math.pow(cx - mx, 2) + Math.pow(cy - my, 2));
-        if (distance >= limit) {
-          unsub();
-          res(distance);
-        }
-      });
-
-      setTimeout(() => rej(null), 100);
-    });
 </script>
 
 {#if $store.ready}
