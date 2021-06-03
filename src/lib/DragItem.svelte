@@ -2,16 +2,18 @@
   import { getContext } from "svelte";
   import { spring } from "svelte/motion";
   import { key } from "./context";
+  import { isEqualSet } from "./compare-set";
 
   export let index = 0;
   export let draggable = true;
+  export let isSelected = false;
 
   /** @type {number} temporary index while in drag state */
   let nextIndex = index;
 
   let isBeingDragged = false;
   let offset = [0, 0];
-  let _dragIds = [];
+  let _dragIds = new Set();
 
   const pos = spring([0, 0], {
     stiffness: 0.1,
@@ -22,23 +24,25 @@
 
   $: {
     const { dragIds } = $store;
-    if (_dragIds.join("") !== dragIds.join("")) {
-      _dragIds = dragIds;
-      const offset = dragIds.reduce((acc, cur) => {
-        if (nextIndex > cur) return ++acc;
-        return acc;
-      }, 0);
+    if (!isEqualSet(dragIds, _dragIds)) {
+      _dragIds = new Set(dragIds);
+      let offset = 0;
+      dragIds.forEach((idx) => {
+        if (nextIndex > idx) {
+          offset++;
+        }
+      });
 
       nextIndex = nextIndex - offset;
     }
 
-    if (nextIndex !== index && !$store.isDragging) {
+    if (nextIndex !== index && $store.state === "idle") {
       nextIndex = index;
     }
   }
 
   $: {
-    if (isBeingDragged) {
+    if ($store.state === "dragging" && (isBeingDragged || isSelected)) {
       pos.set(
         $store.pos.map(
           (v, i) => v - offset[i] - (i === 0 ? window.scrollX : window.scrollY)

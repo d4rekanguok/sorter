@@ -56,18 +56,21 @@
   on:dragover|preventDefault={() => null}
   on:drop|preventDefault={() => null}
 >
-  <pre
-    style="white-space: pre-wrap;">
+  <div class="dev">
+    <pre
+      style="white-space: pre-wrap;">
     {Array.from(selected).map(id => data.find(item => item.id === id).value).join(', ')}
   </pre>
 
-  <pre
-    style="white-space: pre-wrap;">
+    <pre
+      style="white-space: pre-wrap;">
     {data.map(v => v.value).join(', ')}
   </pre>
+  </div>
+
   <Drag itemDimension={[250, 45]} on:dragend={handleDragEnd}>
     {#each data as item, index (item.id)}
-      <DragItem {index} let:isDragging>
+      <DragItem {index} isSelected={selected.has(item.id)} let:isDragging>
         <Template
           {item}
           {isDragging}
@@ -98,5 +101,11 @@
     margin: 0 auto;
     padding: 8rem 0;
     max-width: 60rem;
+  }
+
+  .dev {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
   }
 </style>

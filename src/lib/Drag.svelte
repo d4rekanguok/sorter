@@ -18,7 +18,7 @@
     dispatch("dragend", {
       cancelled: false,
       dropIndex,
-      dragIds,
+      dragIds: Array.from(dragIds),
     });
 
     store.transition("idle");

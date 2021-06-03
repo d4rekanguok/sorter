@@ -3,9 +3,10 @@
   import { key } from "./context";
 
   const { store } = getContext(key);
-  $: y = $store.isDragging
-    ? $store.itemDimension[1] * $store.dropIndex || 0
-    : 0;
+  $: y =
+    $store.state === "dragging"
+      ? $store.itemDimension[1] * $store.dropIndex || 0
+      : 0;
 </script>
 
 <div
@@ -14,7 +15,7 @@
     pointer-events: none;
     z-index: 5;
     transform: translate(0px, ${y}px);
-    opacity: ${$store.isDragging ? 1 : 0};
+    opacity: ${$store.state === "dragging" ? 1 : 0};
 `}
 >
   <slot>
