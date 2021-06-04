@@ -42,9 +42,7 @@ export const createStore = () => {
   };
 
   const { subscribe, update } = writable(initialStore);
-  const listeners = Object.fromEntries(
-    Object.values(StateNames).map((k) => [k, []])
-  );
+  const listeners = [];
 
   /**
    * Transition into a new state
@@ -56,7 +54,11 @@ export const createStore = () => {
         return store;
       }
 
-      listeners[state].forEach((cb) => cb(store));
+      listeners.forEach((cb) => {
+        if (cb.__stateName === state && cb.__hook === "pre") {
+          cb(store);
+        }
+      });
 
       if (state === StateNames.dragging) {
         const { dragId, offsetPos } = args;
@@ -71,7 +73,6 @@ export const createStore = () => {
 
         store.offsetPos = offsetPos;
         store.state = StateNames.dragging;
-        return store;
       }
       if (state === StateNames.idle) {
         store.dragIds.clear();
@@ -80,8 +81,13 @@ export const createStore = () => {
         store.offsetPos = [0, 0];
         store.dropIndex = null;
         store.state = StateNames.idle;
-        return store;
       }
+
+      listeners.forEach((cb) => {
+        if (cb.__stateName === state && cb.__hook === "post") {
+          cb(store);
+        }
+      });
 
       return store;
     });
@@ -89,12 +95,15 @@ export const createStore = () => {
   /**
    * Add callback before transiting into a new state
    * @param {StateName} state
+   * @param {"pre" | "post"} hook
    */
-  const onTransit = (state, cb) => {
+  const onTransit = (state, hook, cb) => {
     if (!Object.values(StateNames).includes(state)) {
       return;
     }
-    listeners[state].push(cb);
+    cb.__stateName = state;
+    cb.__hook = hook;
+    listeners.push(cb);
   };
 
   /**
@@ -140,9 +149,7 @@ export const createStore = () => {
     const unsub = subscribe(...args);
     return () => {
       unsub();
-      listeners = Object.fromEntries(
-        Object.values(StateNames).map((k) => [k, []])
-      );
+      listeners = [];
     };
   };
 

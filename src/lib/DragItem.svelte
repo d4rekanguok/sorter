@@ -2,7 +2,6 @@
   import { getContext } from "svelte";
   import { spring } from "svelte/motion";
   import { key, StateNames } from "./context";
-  import { isEqualSet } from "./compare-set";
 
   export let index = 0;
   export let draggable = true;
@@ -10,8 +9,6 @@
 
   /** @type {number} temporary index while in drag state */
   let nextIndex = index;
-
-  let _dragIds = new Set();
   let _abortDragPromise = null;
 
   const pos = spring(null, {
@@ -21,31 +18,27 @@
 
   const { store, dragEnd } = getContext(key);
 
-  store.onTransit(StateNames.dragging, (store) => {
+  store.onTransit(StateNames.dragging, "pre", (store) => {
     if (!isSelected) return;
     store.selectedIds.add(index);
   });
 
+  store.onTransit(StateNames.dragging, "post", (store) => {
+    const { dragIds } = store;
+    let offset = 0;
+    dragIds.forEach((idx) => {
+      if (nextIndex > idx) {
+        offset++;
+      }
+    });
+
+    nextIndex = nextIndex - offset;
+  });
+
   $: {
     if ($store.state === StateNames.idle) {
-      /* when store */
-      if (nextIndex !== index) {
-        nextIndex = index;
-      }
-    }
-    if ($store.state === StateNames.dragging) {
-      const { dragIds } = $store;
-      if (!isEqualSet(dragIds, _dragIds)) {
-        _dragIds = new Set(dragIds);
-        let offset = 0;
-        dragIds.forEach((idx) => {
-          if (nextIndex > idx) {
-            offset++;
-          }
-        });
-
-        nextIndex = nextIndex - offset;
-      }
+      /* after dragend, reconcile these 2 */
+      nextIndex = index;
     }
 
     if ($store.dragIds.has(index)) {
