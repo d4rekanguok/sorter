@@ -49,7 +49,9 @@
 
   $: {
     if ($store.state === StateNames.dragging && $store.dragIds.has(index)) {
-      const i = Array.from($store.dragIds).indexOf(index);
+      const i = Array.from($store.dragIds)
+        .sort((a, b) => a - b)
+        .indexOf(index);
       pos.set(
         getPos(
           $store.pos,
@@ -63,6 +65,14 @@
     }
   }
 
+  /**
+   * Calculate absolute position based on cursor pos
+   * @param {[number, number]} pos
+   * @param {[number, number]} offsetPos
+   * @param {[number, number]} globalScrollPos
+   * @param {number} i
+   * @returns {[number, number]}
+   */
   const getPos = (pos, offsetPos, globalScrollPos, i = 0) => {
     const x = pos[0] - offsetPos[0] - globalScrollPos[0] - i * 10;
     const y = pos[1] - offsetPos[1] - globalScrollPos[0] - i * 10;
@@ -118,7 +128,6 @@
   transform: translate(${$pos[0]}px, ${$pos[1]}px);
 `}
   >
-    <div class="debug-index">{nextIndex}</div>
     <slot isDragging={$store.dragIds.has(index)} />
   </div>
 {/if}
@@ -128,12 +137,5 @@
     /** do not set top/left to 0 */
     top: auto;
     left: auto;
-  }
-
-  .debug-index {
-    position: absolute;
-    left: -2rem;
-    opacity: 0.4;
-    pointer-events: none;
   }
 </style>

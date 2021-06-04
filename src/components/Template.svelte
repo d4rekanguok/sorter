@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   export let item = {};
+  export let index = 0;
   export let isDragging = false;
   export let isSelected = false;
   export let enableAdd = false;
@@ -24,7 +25,7 @@
 </script>
 
 <div class="item" style="--color: {value};" class:isDragging>
-  <div>{value}</div>
+  <div>{index} {value}</div>
   <input type="checkbox" checked={isSelected} on:change={changeHandler} />
 
   {#if enableAdd}

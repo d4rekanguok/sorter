@@ -78,6 +78,7 @@
       <DragItem {index} isSelected={selected.has(item.id)} let:isDragging>
         <Template
           {item}
+          {index}
           {isDragging}
           isSelected={selected.has(item.id)}
           on:select={handleSelect}
@@ -87,7 +88,7 @@
     {/each}
     <DragIndicator />
     <DragItem index={data.length} draggable={false}>
-      <button on:click={handleAdd}>A button</button>
+      <button class="add" on:click={handleAdd}>More</button>
     </DragItem>
   </Drag>
 </main>
@@ -107,6 +108,15 @@
     margin: 0 auto;
     padding: 8rem 0;
     max-width: 60rem;
+  }
+
+  .add {
+    width: 100%;
+    height: 28px;
+    color: white;
+    background-color: cornflowerblue;
+    border: none;
+    border-radius: 4px;
   }
 
   .dev {
