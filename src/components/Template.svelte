@@ -4,6 +4,7 @@
   export let item = {};
   export let isDragging = false;
   export let isSelected = false;
+  export let enableAdd = false;
 
   const dispatch = createEventDispatcher();
 
@@ -25,9 +26,12 @@
 <div class="item" style="--color: {value};" class:isDragging>
   <div>{value}</div>
   <input type="checkbox" checked={isSelected} on:change={changeHandler} />
-  <div class="btn-add">
-    <button on:click={addHandler}>Add</button>
-  </div>
+
+  {#if enableAdd}
+    <div class="btn-add">
+      <button on:click={addHandler}>Add</button>
+    </div>
+  {/if}
 </div>
 
 <style>

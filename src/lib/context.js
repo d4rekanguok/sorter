@@ -17,6 +17,7 @@ export const key = Symbol("Sorter");
  * @property {Set<string>} dragIds - indexes of elements being dragged
  * @property {Set<string>} selectedIds - indexes of selected elements
  * @property {[number, number]} pos - cursor position relative to scroll pos / dom
+ * @property {[number, number]} offsetPos - cursor position relative to item being dragged
  * @property {null | number} dropIndex - calculated drop index during drag. Null when nothing is being dragged.
  */
 
@@ -36,6 +37,7 @@ export const createStore = () => {
     dragIds: new Set(),
     selectedIds: new Set(),
     pos: [0, 0],
+    offsetPos: [0, 0],
     dropIndex: null,
   };
 
@@ -57,7 +59,7 @@ export const createStore = () => {
       listeners[state].forEach((cb) => cb(store));
 
       if (state === StateNames.dragging) {
-        const { dragId } = args;
+        const { dragId, offsetPos } = args;
         const { dragIds, selectedIds } = store;
         if (selectedIds.has(dragId)) {
           selectedIds.forEach((v) => {
@@ -67,6 +69,7 @@ export const createStore = () => {
           dragIds.add(dragId);
         }
 
+        store.offsetPos = offsetPos;
         store.state = StateNames.dragging;
         return store;
       }
@@ -74,6 +77,7 @@ export const createStore = () => {
         store.dragIds.clear();
         store.selectedIds.clear();
         store.pos = [0, 0];
+        store.offsetPos = [0, 0];
         store.dropIndex = null;
         store.state = StateNames.idle;
         return store;
@@ -109,7 +113,6 @@ export const createStore = () => {
         }
 
         if (abort) {
-          console.log('Aborted!')
           rej();
         }
 

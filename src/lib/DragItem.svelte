@@ -11,8 +11,8 @@
   /** @type {number} temporary index while in drag state */
   let nextIndex = index;
 
-  let isBeingDragged = false;
-  let offset = [0, 0];
+  /** @type {'idle' | 'dragging'} */
+  let state = "idle";
   let _dragIds = new Set();
   let _abortDragPromise = null;
 
@@ -49,15 +49,25 @@
 
   $: {
     if ($store.state === StateNames.dragging && $store.dragIds.has(index)) {
+      const i = Array.from($store.dragIds).indexOf(index);
       pos.set(
-        $store.pos.map(
-          (v, i) => v - offset[i] - (i === 0 ? window.scrollX : window.scrollY)
+        getPos(
+          $store.pos,
+          $store.offsetPos,
+          [window.scrollX, window.scrollY],
+          i
         )
       );
     } else {
       pos.set([0, nextIndex * $store.itemDimension[1]]);
     }
   }
+
+  const getPos = (pos, offsetPos, globalScrollPos, i = 0) => {
+    const x = pos[0] - offsetPos[0] - globalScrollPos[0] - i * 10;
+    const y = pos[1] - offsetPos[1] - globalScrollPos[0] - i * 10;
+    return [x, y];
+  };
 
   const handleMouseDown = async (e) => {
     if (!draggable || e.button === 2) return;
@@ -69,9 +79,11 @@
       await promise;
 
       const { offsetX, offsetY } = e;
-      offset = [offsetX, offsetY];
-      isBeingDragged = true;
-      store.transit(StateNames.dragging, { dragId: index });
+      state = "dragging";
+      store.transit(StateNames.dragging, {
+        dragId: index,
+        offsetPos: [offsetX, offsetY],
+      });
 
       document.addEventListener("mouseup", handleMouseUp);
     } catch (e) {
@@ -85,8 +97,7 @@
   };
 
   const handleMouseUp = () => {
-    offset = [0, 0];
-    isBeingDragged = false;
+    state = "idle";
     document.removeEventListener("mouseup", handleMouseUp);
     dragEnd();
   };
@@ -102,13 +113,13 @@
     style={`
   width: ${$store.itemDimension[0]}px;
   height: ${$store.itemDimension[1]}px;
-  position: ${isBeingDragged ? "fixed" : "absolute"};
-  z-index: ${isBeingDragged ? "10" : "1"};
+  position: ${$store.dragIds.has(index) ? "fixed" : "absolute"};
+  z-index: ${$store.dragIds.has(index) ? "10" : "1"};
   transform: translate(${$pos[0]}px, ${$pos[1]}px);
 `}
   >
     <div class="debug-index">{nextIndex}</div>
-    <slot isDragging={isBeingDragged} />
+    <slot isDragging={$store.dragIds.has(index)} />
   </div>
 {/if}
 
