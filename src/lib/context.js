@@ -104,9 +104,10 @@ export const createStore = () => {
    */
   const dragUntil = (limit = 10) => {
     let abort = false;
+    let unsub;
     const promise = new Promise((res, rej) => {
       let currentPos;
-      const unsub = subscribe(({ pos }) => {
+      unsub = subscribe(({ pos }) => {
         if (!currentPos) {
           currentPos = [...pos];
           return;
@@ -120,10 +121,11 @@ export const createStore = () => {
         const [mx, my] = currentPos;
         const distance = Math.sqrt(Math.pow(cx - mx, 2) + Math.pow(cy - my, 2));
         if (distance >= limit) {
-          unsub();
           res(distance);
         }
       });
+    }).finally(() => {
+      unsub();
     });
 
     return {

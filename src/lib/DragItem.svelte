@@ -11,8 +11,6 @@
   /** @type {number} temporary index while in drag state */
   let nextIndex = index;
 
-  /** @type {'idle' | 'dragging'} */
-  let state = "idle";
   let _dragIds = new Set();
   let _abortDragPromise = null;
 
@@ -29,29 +27,32 @@
   });
 
   $: {
-    const { dragIds } = $store;
-    if (!isEqualSet(dragIds, _dragIds)) {
-      _dragIds = new Set(dragIds);
-      let offset = 0;
-      dragIds.forEach((idx) => {
-        if (nextIndex > idx) {
-          offset++;
-        }
-      });
+    if ($store.state === StateNames.idle) {
+      /* when store */
+      if (nextIndex !== index) {
+        nextIndex = index;
+      }
+    }
+    if ($store.state === StateNames.dragging) {
+      const { dragIds } = $store;
+      if (!isEqualSet(dragIds, _dragIds)) {
+        _dragIds = new Set(dragIds);
+        let offset = 0;
+        dragIds.forEach((idx) => {
+          if (nextIndex > idx) {
+            offset++;
+          }
+        });
 
-      nextIndex = nextIndex - offset;
+        nextIndex = nextIndex - offset;
+      }
     }
 
-    if (nextIndex !== index && $store.state === StateNames.idle) {
-      nextIndex = index;
-    }
-  }
-
-  $: {
-    if ($store.state === StateNames.dragging && $store.dragIds.has(index)) {
+    if ($store.dragIds.has(index)) {
       const i = Array.from($store.dragIds)
         .sort((a, b) => a - b)
         .indexOf(index);
+
       pos.set(
         getPos(
           $store.pos,
@@ -69,7 +70,7 @@
    * Calculate absolute position based on cursor pos
    * @param {[number, number]} pos
    * @param {[number, number]} offsetPos
-   * @param {[number, number]} globalScrollPos
+   * @param {[number, number]} globalScrollPos scrollX, scrollY
    * @param {number} i
    * @returns {[number, number]}
    */
@@ -89,7 +90,6 @@
       await promise;
 
       const { offsetX, offsetY } = e;
-      state = "dragging";
       store.transit(StateNames.dragging, {
         dragId: index,
         offsetPos: [offsetX, offsetY],
@@ -107,7 +107,6 @@
   };
 
   const handleMouseUp = () => {
-    state = "idle";
     document.removeEventListener("mouseup", handleMouseUp);
     dragEnd();
   };
