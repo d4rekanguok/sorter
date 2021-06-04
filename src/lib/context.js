@@ -18,6 +18,7 @@ export const key = Symbol("Sorter");
  * @property {Set<string>} selectedIds - indexes of selected elements
  * @property {[number, number]} pos - cursor position relative to scroll pos / dom
  * @property {[number, number]} offsetPos - cursor position relative to item being dragged
+ * @property {[number, number]} scrollPos - outer wrapper scroll position
  * @property {null | number} dropIndex - calculated drop index during drag. Null when nothing is being dragged.
  */
 
@@ -38,6 +39,7 @@ export const createStore = () => {
     selectedIds: new Set(),
     pos: [0, 0],
     offsetPos: [0, 0],
+    scrollPos: [0, 0],
     dropIndex: null,
   };
 

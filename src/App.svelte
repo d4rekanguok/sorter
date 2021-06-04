@@ -57,10 +57,7 @@
   };
 </script>
 
-<main
-  on:dragover|preventDefault={() => null}
-  on:drop|preventDefault={() => null}
->
+<main>
   <div class="dev">
     <pre
       style="white-space: pre-wrap;">
@@ -73,24 +70,30 @@
   </pre>
   </div>
 
-  <Drag itemDimension={[250, 45]} on:dragend={handleDragEnd}>
-    {#each data as item, index (item.id)}
-      <DragItem {index} isSelected={selected.has(item.id)} let:isDragging>
-        <Template
-          {item}
-          {index}
-          {isDragging}
-          isSelected={selected.has(item.id)}
-          on:select={handleSelect}
-          on:add={handleAdd}
-        />
+  <div class="drag">
+    <Drag
+      size={data.length}
+      itemDimension={[250, 45]}
+      on:dragend={handleDragEnd}
+    >
+      {#each data as item, index (item.id)}
+        <DragItem {index} isSelected={selected.has(item.id)} let:isDragging>
+          <Template
+            {item}
+            {index}
+            {isDragging}
+            isSelected={selected.has(item.id)}
+            on:select={handleSelect}
+            on:add={handleAdd}
+          />
+        </DragItem>
+      {/each}
+      <DragIndicator />
+      <DragItem index={data.length} draggable={false}>
+        <button class="add" on:click={handleAdd}>More</button>
       </DragItem>
-    {/each}
-    <DragIndicator />
-    <DragItem index={data.length} draggable={false}>
-      <button class="add" on:click={handleAdd}>More</button>
-    </DragItem>
-  </Drag>
+    </Drag>
+  </div>
 </main>
 
 <style>
@@ -123,5 +126,10 @@
     position: fixed;
     top: 0.5rem;
     left: 0.5rem;
+  }
+
+  :global(.drag) {
+    width: 100%;
+    height: 400px;
   }
 </style>

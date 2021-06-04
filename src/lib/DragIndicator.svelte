@@ -7,15 +7,16 @@
     $store.state === "dragging"
       ? $store.itemDimension[1] * $store.dropIndex || 0
       : 0;
+
+  $: opacity = $store.state === "dragging" ? 1 : 0;
 </script>
 
 <div
+  class="indicator-wrapper"
   style={`
-    position: relative;
-    pointer-events: none;
-    z-index: 5;
+    width: ${$store.itemDimension[0]}px;
     transform: translate(0px, ${y}px);
-    opacity: ${$store.state === "dragging" ? 1 : 0};
+    opacity: ${opacity};
 `}
 >
   <slot>
@@ -24,8 +25,13 @@
 </div>
 
 <style>
-  .default-indicator {
+  .indicator-wrapper {
     position: absolute;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .default-indicator {
+    position: relative;
     width: 100%;
     background-color: tomato;
     height: 2px;

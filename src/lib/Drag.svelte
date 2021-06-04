@@ -2,17 +2,21 @@
   import { setContext, onMount, createEventDispatcher } from "svelte";
 
   import { key, createStore, StateNames } from "./context";
-  import { unplace } from "./strategies/vertical";
+  import { unplace, getContainerMaxDimension } from "./strategies/vertical";
 
   const dispatch = createEventDispatcher();
 
   /** @type {[number, number]} [width, height] */
   export let itemDimension = [0, 0];
+  export let size = 0;
+  let className;
+  export { className as class };
 
   /** @type {HTMLDivElement} */
   let ref;
 
   const store = createStore();
+
   const dragEnd = () => {
     const { dropIndex, dragIds } = $store;
     dispatch("dragend", {
@@ -29,6 +33,8 @@
     dragEnd,
   });
 
+  $: maxDimension = getContainerMaxDimension(size, itemDimension);
+
   onMount(() => {
     store.update((store) => {
       if (!ref) return store;
@@ -44,7 +50,7 @@
   const handleMove = (e) => {
     const { clientX, clientY } = e;
     store.update((store) => {
-      const { wd } = store;
+      const { wd, scrollPos, itemDimension } = store;
       const { left: offsetX, top: offsetY } = wd;
       const x = clientX - offsetX;
       const y = clientY - offsetY;
@@ -53,43 +59,80 @@
 
       store.dropIndex = unplace({
         position: [x, y],
-        scrollPosition: [0, 0],
+        scrollPosition: scrollPos,
         dimension: itemDimension,
         containerDimension: wd,
-        length: 100,
+        length: size,
       });
 
       return store;
     });
   };
 
-  const handleScroll = () => {
+  const handleWindowScroll = () => {
     store.update((store) => {
       store.wd = ref.getBoundingClientRect();
       return store;
     });
   };
+
+  const handleManualScroll = () => {
+    if (!ref) return;
+    const y = ref.scrollTop;
+    const x = ref.scrollLeft;
+
+    store.update((store) => {
+      store.scrollPos = [x, y];
+      return store;
+    });
+  };
 </script>
 
-<svelte:window on:mousemove={handleMove} on:scroll={handleScroll} />
-<div style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
-  {$store.pos.join(" | ")}
-  <br />
-  {$store.wd?.left} | {$store.wd?.top}
-</div>
+<svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
+<pre
+  style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
+cursor: {$store.pos.join(" | ")}
+scrollPos: {$store.scrollPos.join(" | ")}
+container dimension: {$store.wd?.left} | {$store.wd?.top}
+</pre>
+
 <div
+  class="outer-wrapper {className}"
   bind:this={ref}
-  class="wrapper"
-  on:drop|preventDefault={() => null}
-  on:dragover|preventDefault={() => null}
+  on:scroll={handleManualScroll}
 >
-  <slot />
+  <div
+    class="inner-wrapper"
+    style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
+  >
+    <slot />
+  </div>
 </div>
 
 <style>
-  .wrapper {
+  .inner-wrapper {
     position: relative;
+  }
+
+  .outer-wrapper {
+    position: relative;
+    overflow: scroll;
     width: 100%;
-    height: 100vh;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .outer-wrapper::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  .outer-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .outer-wrapper::-webkit-scrollbar-thumb {
+    background-color: pink;
+    border-radius: 100px;
   }
 </style>
