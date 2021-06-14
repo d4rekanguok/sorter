@@ -15,7 +15,7 @@ const unplace = ({
     scrollPosition,
     length,
 }) => {
-    const x = position[0]
+    const x = position[0] + scrollPosition[0]
     const w = dimension[0]
     const offsetX = scrollPosition[0]
 
