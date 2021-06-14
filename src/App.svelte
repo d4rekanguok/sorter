@@ -3,6 +3,7 @@
     import { nanoid } from 'nanoid'
 
     import { Drag, DragItem, DragIndicator, reorder } from './lib'
+    import DragVirtualizer from './lib/DragVirtualizer.svelte'
     import Template from './components/Template.svelte'
 
     /**
@@ -14,7 +15,7 @@
 
     /** @type {Data[]} */
     let data = Object.keys(colors)
-        .filter((_, i) => i < 20)
+        .filter((_, i) => i < 1000)
         .map((color) => ({
             id: nanoid(6),
             value: color,
@@ -75,20 +76,22 @@
             on:dragend={handleDragEnd}
         >
             {#each data as item, index (item.id)}
-                <DragItem
-                    {index}
-                    isSelected={selected.has(item.id)}
-                    let:isDragging
-                >
-                    <Template
-                        {item}
+                <DragVirtualizer {index}>
+                    <DragItem
                         {index}
-                        {isDragging}
                         isSelected={selected.has(item.id)}
-                        on:select={handleSelect}
-                        on:add={handleAdd}
-                    />
-                </DragItem>
+                        let:isDragging
+                    >
+                        <Template
+                            {item}
+                            {index}
+                            {isDragging}
+                            isSelected={selected.has(item.id)}
+                            on:select={handleSelect}
+                            on:add={handleAdd}
+                        />
+                    </DragItem>
+                </DragVirtualizer>
             {/each}
             <DragIndicator />
             <DragItem index={data.length} draggable={false}>

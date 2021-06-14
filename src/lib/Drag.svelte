@@ -56,6 +56,7 @@
         store,
         dragEnd,
         dropIndex,
+        scrollPos,
         strategy: _strategy,
     })
 

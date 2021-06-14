@@ -3,13 +3,14 @@
     import { spring } from 'svelte/motion'
     import { key, DragStates } from './context'
 
-    export let index = 0
+    export let index
     export let draggable = true
     export let isSelected = false
 
     /** @type {number} temporary index while in drag state */
     let nextIndex = index
     let _abortDragPromise = null
+    let _dragIdSize = 0
 
     const pos = spring(null, {
         stiffness: 0.1,
@@ -19,22 +20,11 @@
     const { store, dragEnd, strategy } = getContext(key)
     const { place } = strategy
 
-    store.onTransit(DragStates.dragging, 'pre', (store) => {
-        if (!isSelected) return
-        store.selectedIds.add(index)
-    })
-
-    store.onTransit(DragStates.dragging, 'post', (store) => {
-        const { dragIds } = store
-        let offset = 0
-        dragIds.forEach((idx) => {
-            if (nextIndex > idx) {
-                offset++
-            }
-        })
-
-        nextIndex = nextIndex - offset
-    })
+    $: if (isSelected) {
+        $store.selectedIds.add(index)
+    } else {
+        $store.selectedIds.delete(index)
+    }
 
     $: {
         if ($store.state === DragStates.idle) {
@@ -56,6 +46,18 @@
                 )
             )
         } else {
+            const { dragIds } = $store
+            if (dragIds.size !== _dragIdSize) {
+                let offset = 0
+                dragIds.forEach((idx) => {
+                    if (nextIndex > idx) {
+                        offset++
+                    }
+                })
+                nextIndex = nextIndex - offset
+                _dragIdSize = dragIds.size
+            }
+
             pos.set(
                 place({ index: nextIndex, dimension: $store.itemDimension })
             )

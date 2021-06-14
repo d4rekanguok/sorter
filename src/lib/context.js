@@ -22,15 +22,6 @@ export const createStore = () => {
     }
 
     const { subscribe, update } = writable(initialStore)
-    let listeners = []
-
-    function runListeners(store, state, hook) {
-        listeners.forEach((cb) => {
-            if (cb.__stateName === state && cb.__hook === hook) {
-                cb(store)
-            }
-        })
-    }
 
     /**
      * Transition into a new state
@@ -44,8 +35,6 @@ export const createStore = () => {
             ) {
                 return store
             }
-
-            runListeners(store, state, 'pre')
 
             if (state === DragStates.dragging) {
                 const { dragId, offsetPos } = args
@@ -69,24 +58,8 @@ export const createStore = () => {
                 store.state = DragStates.idle
             }
 
-            runListeners(store, state, 'post')
-
             return store
         })
-
-    /**
-     * Add callback before transiting into a new state
-     * @param {StateName} state
-     * @param {"pre" | "post"} hook
-     */
-    const onTransit = (state, hook, cb) => {
-        if (!Object.values(DragStates).includes(state)) {
-            return
-        }
-        cb.__stateName = state
-        cb.__hook = hook
-        listeners.push(cb)
-    }
 
     /**
      * Utils. Return a promise that resolve after cursor has moved a certain distance
@@ -129,13 +102,5 @@ export const createStore = () => {
         }
     }
 
-    const subscribeAll = (...args) => {
-        const unsub = subscribe(...args)
-        return () => {
-            unsub()
-            listeners = []
-        }
-    }
-
-    return { subscribe: subscribeAll, update, transit, onTransit, dragUntil }
+    return { subscribe, update, transit, dragUntil }
 }
