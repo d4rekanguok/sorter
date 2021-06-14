@@ -1,5 +1,6 @@
 <script>
     import { setContext, onMount, createEventDispatcher } from 'svelte'
+    import { derived } from 'svelte/store'
     import { key, createStore, DragStates } from './context'
     import { defaultStrategies } from './strategies'
     import { detectScrollZone, createAutoScrollStore } from './autoScroll'
@@ -23,27 +24,39 @@
 
     const store = createStore()
     const scrollPos = createAutoScrollStore()
+    const dropIndex = derived([store, scrollPos], ([_store, _scrollPos]) => {
+        return _store.dragIds.size > 0
+            ? unplace({
+                  position: _store.pos,
+                  scrollPosition: _scrollPos,
+                  dimension: _store.itemDimension,
+                  containerDimension: _store.wd,
+                  length: size,
+              })
+            : null
+    })
 
     const dragEnd = () => {
-        const { dropIndex, dragIds } = $store
+        const { dragIds } = $store
         dispatch('dragend', {
             cancelled: false,
-            dropIndex,
+            dropIndex: $dropIndex,
             dragIds: Array.from(dragIds).sort((a, b) => a - b),
         })
 
         store.transit(DragStates.idle)
     }
 
-    setContext(key, {
-        store,
-        dragEnd,
-        strategy: _strategy,
-    })
-
     $: maxDimension = getContainerMaxDimension({
         size,
         templateDimension: itemDimension,
+    })
+
+    setContext(key, {
+        store,
+        dragEnd,
+        dropIndex,
+        strategy: _strategy,
     })
 
     onMount(() => {
@@ -61,7 +74,7 @@
     const handleMove = (e) => {
         const { clientX, clientY } = e
         store.update((store) => {
-            const { wd, itemDimension, dragIds } = store
+            const { wd, dragIds } = store
             const { left: offsetX, top: offsetY } = wd
             const x = clientX - offsetX
             const y = clientY - offsetY
@@ -76,14 +89,6 @@
                 )
                 autoScroll({ axis, direction, scrollPos })
             }
-
-            store.dropIndex = unplace({
-                position: [x, y],
-                scrollPosition: $scrollPos,
-                dimension: itemDimension,
-                containerDimension: wd,
-                length: size,
-            })
 
             return store
         })
@@ -121,6 +126,7 @@
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
 <pre
     style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
+dropIndex: {$dropIndex}
 cursor: {$store.pos.join(" | ")}
 scrollPos: {$scrollPos.join(" | ")}
 container dimension: {$store.wd?.left} | {$store.wd?.top}

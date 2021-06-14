@@ -2,10 +2,10 @@
     import { getContext } from 'svelte'
     import { key } from './context'
 
-    const { store } = getContext(key)
+    const { store, dropIndex } = getContext(key)
     $: y =
         $store.state === 'dragging'
-            ? $store.itemDimension[1] * $store.dropIndex || 0
+            ? $store.itemDimension[1] * $dropIndex || 0
             : 0
 
     $: opacity = $store.state === 'dragging' ? 1 : 0

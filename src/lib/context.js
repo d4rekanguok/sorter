@@ -19,7 +19,6 @@ export const createStore = () => {
         selectedIds: new Set(),
         pos: [0, 0],
         offsetPos: [0, 0],
-        dropIndex: null,
     }
 
     const { subscribe, update } = writable(initialStore)
@@ -67,7 +66,6 @@ export const createStore = () => {
                 store.selectedIds.clear()
                 store.pos = [0, 0]
                 store.offsetPos = [0, 0]
-                store.dropIndex = null
                 store.state = DragStates.idle
             }
 

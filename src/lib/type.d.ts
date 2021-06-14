@@ -15,7 +15,6 @@ declare namespace Drag {
     selectedIds: Set<string>
     pos: Point
     offsetPos: Point
-    dropIndex: null | number
   }
   
   interface UnplaceArgs {
