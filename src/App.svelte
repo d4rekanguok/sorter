@@ -2,8 +2,13 @@
     import colors from 'css-color-names'
     import { nanoid } from 'nanoid'
 
-    import { Drag, DragItem, DragIndicator, reorder } from './lib'
-    import DragVirtualizer from './lib/DragVirtualizer.svelte'
+    import {
+        Drag,
+        DragItem,
+        DragIndicator,
+        DragVirtualizer,
+        reorder,
+    } from './lib'
     import Template from './components/Template.svelte'
 
     /**
