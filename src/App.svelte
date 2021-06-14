@@ -17,7 +17,7 @@
 
   /** @type {Data[]} */
   let data = Object.keys(colors)
-    .filter((_, i) => i < 10)
+    .filter((_, i) => i < 20)
     .map((color) => ({
       id: nanoid(6),
       value: color,

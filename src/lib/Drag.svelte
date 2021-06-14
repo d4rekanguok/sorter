@@ -1,8 +1,12 @@
 <script>
   import { setContext, onMount, createEventDispatcher } from "svelte";
-
-  import { key, createStore, StateNames } from "./context";
-  import { unplace, getContainerMaxDimension } from "./strategies/vertical";
+  import { key, createStore, DragStates } from "./context";
+  import {
+    unplace,
+    getContainerMaxDimension,
+    autoScroll,
+  } from "./strategies/vertical";
+  import { detectScrollZone, createAutoScrollStore } from "./autoScroll";
 
   const dispatch = createEventDispatcher();
 
@@ -16,6 +20,7 @@
   let ref;
 
   const store = createStore();
+  const scrollPos = createAutoScrollStore();
 
   const dragEnd = () => {
     const { dropIndex, dragIds } = $store;
@@ -25,7 +30,7 @@
       dragIds: Array.from(dragIds).sort((a, b) => a - b),
     });
 
-    store.transit(StateNames.idle);
+    store.transit(DragStates.idle);
   };
 
   setContext(key, {
@@ -50,16 +55,25 @@
   const handleMove = (e) => {
     const { clientX, clientY } = e;
     store.update((store) => {
-      const { wd, scrollPos, itemDimension } = store;
+      const { wd, itemDimension, dragIds } = store;
       const { left: offsetX, top: offsetY } = wd;
       const x = clientX - offsetX;
       const y = clientY - offsetY;
 
       store.pos = [x, y];
 
+      if (dragIds.size > 0) {
+        const { direction, axis } = detectScrollZone(
+          [clientX, clientY],
+          wd,
+          20
+        );
+        autoScroll({ axis, direction, scrollPos });
+      }
+
       store.dropIndex = unplace({
         position: [x, y],
-        scrollPosition: scrollPos,
+        scrollPosition: $scrollPos,
         dimension: itemDimension,
         containerDimension: wd,
         length: size,
@@ -81,18 +95,23 @@
     const y = ref.scrollTop;
     const x = ref.scrollLeft;
 
-    store.update((store) => {
-      store.scrollPos = [x, y];
-      return store;
-    });
+    scrollPos.set([x, y]);
   };
+
+  const handleAutoScroll = ([x, y]) => {
+    if (!ref) return;
+    ref.scrollTop = y;
+    ref.scrollLeft = x;
+  };
+
+  $: handleAutoScroll($scrollPos);
 </script>
 
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
 <pre
   style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 cursor: {$store.pos.join(" | ")}
-scrollPos: {$store.scrollPos.join(" | ")}
+scrollPos: {$scrollPos.join(" | ")}
 container dimension: {$store.wd?.left} | {$store.wd?.top}
 </pre>
 

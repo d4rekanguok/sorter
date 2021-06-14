@@ -1,7 +1,7 @@
 <script>
   import { getContext } from "svelte";
   import { spring } from "svelte/motion";
-  import { key, StateNames } from "./context";
+  import { key, DragStates } from "./context";
 
   export let index = 0;
   export let draggable = true;
@@ -18,12 +18,12 @@
 
   const { store, dragEnd } = getContext(key);
 
-  store.onTransit(StateNames.dragging, "pre", (store) => {
+  store.onTransit(DragStates.dragging, "pre", (store) => {
     if (!isSelected) return;
     store.selectedIds.add(index);
   });
 
-  store.onTransit(StateNames.dragging, "post", (store) => {
+  store.onTransit(DragStates.dragging, "post", (store) => {
     const { dragIds } = store;
     let offset = 0;
     dragIds.forEach((idx) => {
@@ -36,7 +36,7 @@
   });
 
   $: {
-    if ($store.state === StateNames.idle) {
+    if ($store.state === DragStates.idle) {
       /* after dragend, reconcile these 2 */
       nextIndex = index;
     }
@@ -83,7 +83,7 @@
       await promise;
 
       const { offsetX, offsetY } = e;
-      store.transit(StateNames.dragging, {
+      store.transit(DragStates.dragging, {
         dragId: index,
         offsetPos: [offsetX, offsetY],
       });

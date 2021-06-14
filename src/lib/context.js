@@ -16,14 +16,13 @@ export const key = Symbol("Sorter");
  * @property {StateName} state
  * @property {Set<string>} dragIds - indexes of elements being dragged
  * @property {Set<string>} selectedIds - indexes of selected elements
- * @property {[number, number]} pos - cursor position relative to scroll pos / dom
+ * @property {[number, number]} pos - cursor position relative to window scroll pos / dom
  * @property {[number, number]} offsetPos - cursor position relative to item being dragged
- * @property {[number, number]} scrollPos - outer wrapper scroll position
  * @property {null | number} dropIndex - calculated drop index during drag. Null when nothing is being dragged.
  */
 
 /** @type {Record<StateName, StateName>} */
-export const StateNames = {
+export const DragStates = {
   idle: "idle",
   dragging: "dragging",
 };
@@ -34,17 +33,24 @@ export const createStore = () => {
     wd: null,
     itemDimension: [0, 0],
     ready: false,
-    state: StateNames.idle,
+    state: DragStates.idle,
     dragIds: new Set(),
     selectedIds: new Set(),
     pos: [0, 0],
     offsetPos: [0, 0],
-    scrollPos: [0, 0],
     dropIndex: null,
   };
 
   const { subscribe, update } = writable(initialStore);
-  const listeners = [];
+  let listeners = [];
+
+  function runListeners(store, state, hook) {
+    listeners.forEach((cb) => {
+      if (cb.__stateName === state && cb.__hook === hook) {
+        cb(store);
+      }
+    });
+  }
 
   /**
    * Transition into a new state
@@ -52,17 +58,13 @@ export const createStore = () => {
    */
   const transit = (state, args) =>
     update((store) => {
-      if (state === store.state || !Object.values(StateNames).includes(state)) {
+      if (state === store.state || !Object.values(DragStates).includes(state)) {
         return store;
       }
 
-      listeners.forEach((cb) => {
-        if (cb.__stateName === state && cb.__hook === "pre") {
-          cb(store);
-        }
-      });
+      runListeners(store, state, 'pre');
 
-      if (state === StateNames.dragging) {
+      if (state === DragStates.dragging) {
         const { dragId, offsetPos } = args;
         const { dragIds, selectedIds } = store;
         if (selectedIds.has(dragId)) {
@@ -74,22 +76,18 @@ export const createStore = () => {
         }
 
         store.offsetPos = offsetPos;
-        store.state = StateNames.dragging;
+        store.state = DragStates.dragging;
       }
-      if (state === StateNames.idle) {
+      if (state === DragStates.idle) {
         store.dragIds.clear();
         store.selectedIds.clear();
         store.pos = [0, 0];
         store.offsetPos = [0, 0];
         store.dropIndex = null;
-        store.state = StateNames.idle;
+        store.state = DragStates.idle;
       }
 
-      listeners.forEach((cb) => {
-        if (cb.__stateName === state && cb.__hook === "post") {
-          cb(store);
-        }
-      });
+      runListeners(store, state, 'post');
 
       return store;
     });
@@ -100,7 +98,7 @@ export const createStore = () => {
    * @param {"pre" | "post"} hook
    */
   const onTransit = (state, hook, cb) => {
-    if (!Object.values(StateNames).includes(state)) {
+    if (!Object.values(DragStates).includes(state)) {
       return;
     }
     cb.__stateName = state;
@@ -146,7 +144,7 @@ export const createStore = () => {
       },
     };
   };
-
+  
   const subscribeAll = (...args) => {
     const unsub = subscribe(...args);
     return () => {

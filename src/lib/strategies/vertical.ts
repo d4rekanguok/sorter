@@ -29,7 +29,7 @@ export const unplace = ({
   scrollPosition,
   length
 }: UnplaceArgs): number => {
-  const y = position[1]
+  const y = position[1] + scrollPosition[1]
   const h = dimension[1]
   const offsetY = scrollPosition[1]
 
