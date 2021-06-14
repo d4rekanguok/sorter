@@ -1,10 +1,10 @@
-import { createStrategy } from '../createStrategy'
+import { createStrategy } from "../createStrategy";
 
 /** @type {Drag.Strategy['place']} */
-const place = ({ index, dimension }) => {
-    const h = dimension[1]
-    const y = h * index
-    return [0, y]
+const place = ({ dragItemIndex, dimension }) => {
+    const w = dimension[0]
+    const x = w * dragItemIndex
+    return [x, 0]
 }
 
 /** @type {Drag.Strategy['unplace']} */
@@ -15,29 +15,29 @@ const unplace = ({
     scrollPosition,
     length,
 }) => {
-    const y = position[1] + scrollPosition[1]
-    const h = dimension[1]
-    const offsetY = scrollPosition[1]
+    const x = position[0]
+    const w = dimension[0]
+    const offsetX = scrollPosition[0]
 
-    const start = Math.ceil(offsetY / h)
+    const start = Math.ceil(offsetX / w)
     const end = Math.min(
         length,
-        Math.floor((offsetY + containerDimension.height) / h)
+        Math.floor((offsetX + containerDimension.width) / w)
     )
 
-    const i = Math.round(y / h)
+    const i = Math.round(x / w)
     return Math.max(start, Math.min(end, i))
 }
 
 /** @type {Drag.Strategy['getContainerMaxDimension']} */
 const getContainerMaxDimension = ({ size, templateDimension }) => {
     const [w, h] = templateDimension
-    return [w, h * size]
+    return [w * size, h]
 }
 
 /** @type {Drag.Strategy['autoScroll']} */
 const autoScroll = ({ axis, direction, scrollPos }) => {
-    if (axis === 'y' && direction !== 0) {
+    if (axis === 'x' && direction !== 0) {
         scrollPos.start({ direction, axis, delta: 3 })
     } else {
         scrollPos.stop()

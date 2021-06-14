@@ -1,0 +1,4 @@
+/dist/
+/public/
+/lib/
+!/src/lib

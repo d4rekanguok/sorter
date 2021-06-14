@@ -1,134 +1,138 @@
 <script>
-  import { getContext } from "svelte";
-  import { spring } from "svelte/motion";
-  import { key, DragStates } from "./context";
+    import { getContext } from 'svelte'
+    import { spring } from 'svelte/motion'
+    import { key, DragStates } from './context'
 
-  export let index = 0;
-  export let draggable = true;
-  export let isSelected = false;
+    export let index = 0
+    export let draggable = true
+    export let isSelected = false
 
-  /** @type {number} temporary index while in drag state */
-  let nextIndex = index;
-  let _abortDragPromise = null;
+    /** @type {number} temporary index while in drag state */
+    let nextIndex = index
+    let _abortDragPromise = null
 
-  const pos = spring(null, {
-    stiffness: 0.1,
-    damping: 0.4,
-  });
+    const pos = spring(null, {
+        stiffness: 0.1,
+        damping: 0.4,
+    })
 
-  const { store, dragEnd, strategy } = getContext(key);
-  const { place } = strategy;
+    const { store, dragEnd, strategy } = getContext(key)
+    const { place } = strategy
 
-  store.onTransit(DragStates.dragging, "pre", (store) => {
-    if (!isSelected) return;
-    store.selectedIds.add(index);
-  });
+    store.onTransit(DragStates.dragging, 'pre', (store) => {
+        if (!isSelected) return
+        store.selectedIds.add(index)
+    })
 
-  store.onTransit(DragStates.dragging, "post", (store) => {
-    const { dragIds } = store;
-    let offset = 0;
-    dragIds.forEach((idx) => {
-      if (nextIndex > idx) {
-        offset++;
-      }
-    });
+    store.onTransit(DragStates.dragging, 'post', (store) => {
+        const { dragIds } = store
+        let offset = 0
+        dragIds.forEach((idx) => {
+            if (nextIndex > idx) {
+                offset++
+            }
+        })
 
-    nextIndex = nextIndex - offset;
-  });
+        nextIndex = nextIndex - offset
+    })
 
-  $: {
-    if ($store.state === DragStates.idle) {
-      /* after dragend, reconcile these 2 */
-      nextIndex = index;
+    $: {
+        if ($store.state === DragStates.idle) {
+            /* after dragend, reconcile these 2 */
+            nextIndex = index
+        }
+
+        if ($store.dragIds.has(index)) {
+            const i = Array.from($store.dragIds)
+                .sort((a, b) => a - b)
+                .indexOf(index)
+
+            pos.set(
+                getPos(
+                    $store.pos,
+                    $store.offsetPos,
+                    [window.scrollX, window.scrollY],
+                    i
+                )
+            )
+        } else {
+            pos.set(
+                place({ index: nextIndex, dimension: $store.itemDimension })
+            )
+        }
     }
 
-    if ($store.dragIds.has(index)) {
-      const i = Array.from($store.dragIds)
-        .sort((a, b) => a - b)
-        .indexOf(index);
-
-      pos.set(
-        getPos(
-          $store.pos,
-          $store.offsetPos,
-          [window.scrollX, window.scrollY],
-          i
-        )
-      );
-    } else {
-      pos.set(place({ index: nextIndex, dimension: $store.itemDimension }));
+    /**
+     * Calculate absolute position based on cursor pos
+     * @param {[number, number]} pos
+     * @param {[number, number]} offsetPos
+     * @param {[number, number]} globalScrollPos scrollX, scrollY
+     * @param {number} i
+     * @returns {[number, number]}
+     */
+    const getPos = (pos, offsetPos, globalScrollPos, i = 0) => {
+        const x = pos[0] - offsetPos[0] - globalScrollPos[0] - i * 10
+        const y = pos[1] - offsetPos[1] - globalScrollPos[0] - i * 10
+        return [x, y]
     }
-  }
 
-  /**
-   * Calculate absolute position based on cursor pos
-   * @param {[number, number]} pos
-   * @param {[number, number]} offsetPos
-   * @param {[number, number]} globalScrollPos scrollX, scrollY
-   * @param {number} i
-   * @returns {[number, number]}
-   */
-  const getPos = (pos, offsetPos, globalScrollPos, i = 0) => {
-    const x = pos[0] - offsetPos[0] - globalScrollPos[0] - i * 10;
-    const y = pos[1] - offsetPos[1] - globalScrollPos[0] - i * 10;
-    return [x, y];
-  };
+    const handleMouseDown = async (e) => {
+        if (!draggable || e.button === 2) return
 
-  const handleMouseDown = async (e) => {
-    if (!draggable || e.button === 2) return;
+        try {
+            const { abort, promise } = store.dragUntil(10)
+            _abortDragPromise = abort
+            document.addEventListener('mouseup', handleMouseUpAbort)
+            await promise
 
-    try {
-      const { abort, promise } = store.dragUntil(10);
-      _abortDragPromise = abort;
-      document.addEventListener("mouseup", handleMouseUpAbort);
-      await promise;
+            const { offsetX, offsetY } = e
+            store.transit(DragStates.dragging, {
+                dragId: index,
+                offsetPos: [offsetX, offsetY],
+            })
 
-      const { offsetX, offsetY } = e;
-      store.transit(DragStates.dragging, {
-        dragId: index,
-        offsetPos: [offsetX, offsetY],
-      });
-
-      document.addEventListener("mouseup", handleMouseUp);
-    } catch (e) {
-      return;
+            document.addEventListener('mouseup', handleMouseUp)
+        } catch (e) {
+            return
+        }
     }
-  };
 
-  const handleMouseUpAbort = () => {
-    if (_abortDragPromise) _abortDragPromise();
-    document.removeEventListener("mouseup", handleMouseUpAbort);
-  };
+    const handleMouseUpAbort = () => {
+        if (_abortDragPromise) _abortDragPromise()
+        document.removeEventListener('mouseup', handleMouseUpAbort)
+    }
 
-  const handleMouseUp = () => {
-    document.removeEventListener("mouseup", handleMouseUp);
-    dragEnd();
-  };
+    const handleMouseUp = () => {
+        document.removeEventListener('mouseup', handleMouseUp)
+        dragEnd()
+    }
+
 </script>
 
 {#if $store.ready}
-  <div
-    on:mousedown|preventDefault|stopPropagation={handleMouseDown}
-    on:dragstart|preventDefault|stopPropagation={() => null}
-    on:drop|preventDefault={() => null}
-    on:dragover|preventDefault={() => null}
-    class="drag-item"
-    style={`
+    <div
+        on:mousedown|preventDefault|stopPropagation={handleMouseDown}
+        on:dragstart|preventDefault|stopPropagation={() => null}
+        on:drop|preventDefault={() => null}
+        on:dragover|preventDefault={() => null}
+        class="drag-item"
+        style={`
   width: ${$store.itemDimension[0]}px;
   height: ${$store.itemDimension[1]}px;
-  position: ${$store.dragIds.has(index) ? "fixed" : "absolute"};
-  z-index: ${$store.dragIds.has(index) ? "10" : "1"};
+  position: ${$store.dragIds.has(index) ? 'fixed' : 'absolute'};
+  z-index: ${$store.dragIds.has(index) ? '10' : '1'};
   transform: translate(${$pos[0]}px, ${$pos[1]}px);
 `}
-  >
-    <slot isDragging={$store.dragIds.has(index)} />
-  </div>
+    >
+        <slot isDragging={$store.dragIds.has(index)} />
+    </div>
 {/if}
 
 <style>
-  .drag-item {
-    /** do not set top/left to 0 */
-    top: auto;
-    left: auto;
-  }
+    .drag-item {
+        /** do not set top/left to 0 */
+        top: auto;
+        left: auto;
+    }
+
 </style>

@@ -1,167 +1,169 @@
 <script>
-  import { setContext, onMount, createEventDispatcher } from "svelte";
-  import { key, createStore, DragStates } from "./context";
-  import { defaultStrategies } from "./strategies";
-  import { detectScrollZone, createAutoScrollStore } from "./autoScroll";
+    import { setContext, onMount, createEventDispatcher } from 'svelte'
+    import { key, createStore, DragStates } from './context'
+    import { defaultStrategies } from './strategies'
+    import { detectScrollZone, createAutoScrollStore } from './autoScroll'
 
-  const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher()
 
-  /** @type {Drag.Dimension} [width, height] */
-  export let itemDimension = [0, 0];
-  export let size = 0;
-  let className;
-  export { className as class };
-  export let strategy = "vertical";
+    /** @type {Drag.Dimension} [width, height] */
+    export let itemDimension = [0, 0]
+    export let size = 0
+    let className
+    export { className as class }
+    export let strategy = 'vertical'
 
-  const _strategy =
-    typeof strategy === "string" ? defaultStrategies[strategy] : strategy;
+    const _strategy =
+        typeof strategy === 'string' ? defaultStrategies[strategy] : strategy
 
-  const { unplace, getContainerMaxDimension, autoScroll } = _strategy;
+    const { unplace, getContainerMaxDimension, autoScroll } = _strategy
 
-  /** @type {HTMLDivElement} */
-  let ref;
+    /** @type {HTMLDivElement} */
+    let ref
 
-  const store = createStore();
-  const scrollPos = createAutoScrollStore();
+    const store = createStore()
+    const scrollPos = createAutoScrollStore()
 
-  const dragEnd = () => {
-    const { dropIndex, dragIds } = $store;
-    dispatch("dragend", {
-      cancelled: false,
-      dropIndex,
-      dragIds: Array.from(dragIds).sort((a, b) => a - b),
-    });
+    const dragEnd = () => {
+        const { dropIndex, dragIds } = $store
+        dispatch('dragend', {
+            cancelled: false,
+            dropIndex,
+            dragIds: Array.from(dragIds).sort((a, b) => a - b),
+        })
 
-    store.transit(DragStates.idle);
-  };
-
-  setContext(key, {
-    store,
-    dragEnd,
-    strategy: _strategy,
-  });
-
-  $: maxDimension = getContainerMaxDimension({
-    size,
-    templateDimension: itemDimension,
-  });
-
-  onMount(() => {
-    store.update((store) => {
-      if (!ref) return store;
-
-      store.wd = ref.getBoundingClientRect();
-      store.itemDimension = itemDimension;
-      store.ready = true;
-
-      return store;
-    });
-  });
-
-  const handleMove = (e) => {
-    const { clientX, clientY } = e;
-    store.update((store) => {
-      const { wd, itemDimension, dragIds } = store;
-      const { left: offsetX, top: offsetY } = wd;
-      const x = clientX - offsetX;
-      const y = clientY - offsetY;
-
-      store.pos = [x, y];
-
-      if (dragIds.size > 0) {
-        const { direction, axis } = detectScrollZone(
-          [clientX, clientY],
-          wd,
-          20
-        );
-        autoScroll({ axis, direction, scrollPos });
-      }
-
-      store.dropIndex = unplace({
-        position: [x, y],
-        scrollPosition: $scrollPos,
-        dimension: itemDimension,
-        containerDimension: wd,
-        length: size,
-      });
-
-      return store;
-    });
-  };
-
-  const handleWindowScroll = () => {
-    store.update((store) => {
-      store.wd = ref.getBoundingClientRect();
-      return store;
-    });
-  };
-
-  const handleWrapperScroll = () => {
-    if (!ref) return;
-    const y = ref.scrollTop;
-    const x = ref.scrollLeft;
-
-    if ($store.dragIds.size == 0) {
-      scrollPos.stop();
+        store.transit(DragStates.idle)
     }
 
-    scrollPos.set([x, y]);
-  };
+    setContext(key, {
+        store,
+        dragEnd,
+        strategy: _strategy,
+    })
 
-  const handleWrapperAutoScroll = ([x, y]) => {
-    if (!ref) return;
-    ref.scrollTop = y;
-    ref.scrollLeft = x;
-  };
+    $: maxDimension = getContainerMaxDimension({
+        size,
+        templateDimension: itemDimension,
+    })
 
-  $: handleWrapperAutoScroll($scrollPos);
+    onMount(() => {
+        store.update((store) => {
+            if (!ref) return store
+
+            store.wd = ref.getBoundingClientRect()
+            store.itemDimension = itemDimension
+            store.ready = true
+
+            return store
+        })
+    })
+
+    const handleMove = (e) => {
+        const { clientX, clientY } = e
+        store.update((store) => {
+            const { wd, itemDimension, dragIds } = store
+            const { left: offsetX, top: offsetY } = wd
+            const x = clientX - offsetX
+            const y = clientY - offsetY
+
+            store.pos = [x, y]
+
+            if (dragIds.size > 0) {
+                const { direction, axis } = detectScrollZone(
+                    [clientX, clientY],
+                    wd,
+                    20
+                )
+                autoScroll({ axis, direction, scrollPos })
+            }
+
+            store.dropIndex = unplace({
+                position: [x, y],
+                scrollPosition: $scrollPos,
+                dimension: itemDimension,
+                containerDimension: wd,
+                length: size,
+            })
+
+            return store
+        })
+    }
+
+    const handleWindowScroll = () => {
+        store.update((store) => {
+            store.wd = ref.getBoundingClientRect()
+            return store
+        })
+    }
+
+    const handleWrapperScroll = () => {
+        if (!ref) return
+        const y = ref.scrollTop
+        const x = ref.scrollLeft
+
+        if ($store.dragIds.size == 0) {
+            scrollPos.stop()
+        }
+
+        scrollPos.set([x, y])
+    }
+
+    const handleWrapperAutoScroll = ([x, y]) => {
+        if (!ref) return
+        ref.scrollTop = y
+        ref.scrollLeft = x
+    }
+
+    $: handleWrapperAutoScroll($scrollPos)
+
 </script>
 
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
 <pre
-  style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
+    style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 cursor: {$store.pos.join(" | ")}
 scrollPos: {$scrollPos.join(" | ")}
 container dimension: {$store.wd?.left} | {$store.wd?.top}
 </pre>
 
 <div
-  class="outer-wrapper {className}"
-  bind:this={ref}
-  on:scroll={handleWrapperScroll}
+    class="outer-wrapper {className}"
+    bind:this={ref}
+    on:scroll={handleWrapperScroll}
 >
-  <div
-    class="inner-wrapper"
-    style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
-  >
-    <slot />
-  </div>
+    <div
+        class="inner-wrapper"
+        style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
+    >
+        <slot />
+    </div>
 </div>
 
 <style>
-  .inner-wrapper {
-    position: relative;
-  }
+    .inner-wrapper {
+        position: relative;
+    }
 
-  .outer-wrapper {
-    position: relative;
-    overflow: scroll;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-  }
+    .outer-wrapper {
+        position: relative;
+        overflow: scroll;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
 
-  .outer-wrapper::-webkit-scrollbar {
-    width: 3px;
-    height: 3px;
-  }
+    .outer-wrapper::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+    }
 
-  .outer-wrapper::-webkit-scrollbar-track {
-    background: transparent;
-  }
+    .outer-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-  .outer-wrapper::-webkit-scrollbar-thumb {
-    background-color: pink;
-    border-radius: 100px;
-  }
+    .outer-wrapper::-webkit-scrollbar-thumb {
+        background-color: pink;
+        border-radius: 100px;
+    }
+
 </style>

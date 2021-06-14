@@ -17,8 +17,11 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "next",
     "css-color-names": "^1.0.1",
+    "eslint": "^7.28.0",
+    "eslint-plugin-svelte3": "^3.2.0",
     "esm": "^3.2.25",
     "nanoid": "^3.1.22",
+    "prettier": "^2.3.1",
     "svelte": "^3.35.0",
     "svelte-preprocess": "^4.6.9",
     "ts-node": "^9.1.1",
