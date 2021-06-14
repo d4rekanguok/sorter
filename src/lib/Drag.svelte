@@ -1,20 +1,22 @@
 <script>
   import { setContext, onMount, createEventDispatcher } from "svelte";
   import { key, createStore, DragStates } from "./context";
-  import {
-    unplace,
-    getContainerMaxDimension,
-    autoScroll,
-  } from "./strategies/vertical";
+  import { defaultStrategies } from "./strategies";
   import { detectScrollZone, createAutoScrollStore } from "./autoScroll";
 
   const dispatch = createEventDispatcher();
 
-  /** @type {[number, number]} [width, height] */
+  /** @type {Drag.Dimension} [width, height] */
   export let itemDimension = [0, 0];
   export let size = 0;
   let className;
   export { className as class };
+  export let strategy = "vertical";
+
+  const _strategy =
+    typeof strategy === "string" ? defaultStrategies[strategy] : strategy;
+
+  const { unplace, getContainerMaxDimension, autoScroll } = _strategy;
 
   /** @type {HTMLDivElement} */
   let ref;
@@ -36,9 +38,13 @@
   setContext(key, {
     store,
     dragEnd,
+    strategy: _strategy,
   });
 
-  $: maxDimension = getContainerMaxDimension(size, itemDimension);
+  $: maxDimension = getContainerMaxDimension({
+    size,
+    templateDimension: itemDimension,
+  });
 
   onMount(() => {
     store.update((store) => {
@@ -90,21 +96,25 @@
     });
   };
 
-  const handleManualScroll = () => {
+  const handleWrapperScroll = () => {
     if (!ref) return;
     const y = ref.scrollTop;
     const x = ref.scrollLeft;
 
+    if ($store.dragIds.size == 0) {
+      scrollPos.stop();
+    }
+
     scrollPos.set([x, y]);
   };
 
-  const handleAutoScroll = ([x, y]) => {
+  const handleWrapperAutoScroll = ([x, y]) => {
     if (!ref) return;
     ref.scrollTop = y;
     ref.scrollLeft = x;
   };
 
-  $: handleAutoScroll($scrollPos);
+  $: handleWrapperAutoScroll($scrollPos);
 </script>
 
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
@@ -118,7 +128,7 @@ container dimension: {$store.wd?.left} | {$store.wd?.top}
 <div
   class="outer-wrapper {className}"
   bind:this={ref}
-  on:scroll={handleManualScroll}
+  on:scroll={handleWrapperScroll}
 >
   <div
     class="inner-wrapper"

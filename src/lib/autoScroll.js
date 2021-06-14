@@ -1,27 +1,17 @@
 import { writable } from 'svelte/store'
 
 /**
- * @typedef Rect
- * @type {[number, number, number, number]}
- */
-
-/**
- * @typedef Point
- * @type {[number, number]}
- */
-
-/**
  * @typedef MoveArgs
  * @type {Object}
- * @property {-1 | 0 | 1} direction
- * @property {'x' | 'y'} axis
+ * @property {Drag.Direction} direction
+ * @property {Drag.Axis} axis
  * @property {number} delta
- * @property {Rect} bound
+ * @property {Drag.Rect} bound
  */
 
 /**
- * @param {Point} p Point
- * @param {Rect} r Rectangle
+ * @param {Drag.Point} p Point
+ * @param {Drag.Rect} r Rectangle
  * @returns {boolean}
  */
 export const isOverlapped = (p , r) => {
@@ -36,7 +26,7 @@ export const isOverlapped = (p , r) => {
 
 /**
  * 
- * @param {Point} clientPos
+ * @param {Drag.Point} clientPos
  * @param {DOMRect} bound
  * @param {number} size
  * @returns {Pick<MoveArgs, 'axis' | 'direction'>}
@@ -46,9 +36,9 @@ export const detectScrollZone = (
   bound, 
   size
 ) => {
-  /** @type {MoveArgs['direction']} */
+  /** @type {Drag.Direction} */
   let direction = 0
-  /** @type {MoveArgs['axis']} */
+  /** @type {Drag.Axis} */
   let axis = 'y'
 
   const { x: rx, y: ry, width: rw, height: rh  } = bound

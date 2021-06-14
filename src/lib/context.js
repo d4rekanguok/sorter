@@ -2,33 +2,14 @@ import { writable } from "svelte/store";
 
 export const key = Symbol("Sorter");
 
-/**
- * @typedef StateName
- * @type {"dragging" | "idle"}
- */
-
-/**
- * @typedef DragStore
- * @type {object}
- * @property {DOMRect} wd - wrapperDimension
- * @property {[number, number]} itemDimension - width & height element dimension
- * @property {boolean} ready
- * @property {StateName} state
- * @property {Set<string>} dragIds - indexes of elements being dragged
- * @property {Set<string>} selectedIds - indexes of selected elements
- * @property {[number, number]} pos - cursor position relative to window scroll pos / dom
- * @property {[number, number]} offsetPos - cursor position relative to item being dragged
- * @property {null | number} dropIndex - calculated drop index during drag. Null when nothing is being dragged.
- */
-
-/** @type {Record<StateName, StateName>} */
+/** @type {Record<Drag.StateNames, Drag.StateNames>} */
 export const DragStates = {
   idle: "idle",
   dragging: "dragging",
 };
 
 export const createStore = () => {
-  /** @type {DragStore} */
+  /** @type {Drag.Store} */
   const initialStore = {
     wd: null,
     itemDimension: [0, 0],
@@ -54,7 +35,7 @@ export const createStore = () => {
 
   /**
    * Transition into a new state
-   * @param {StateName} state
+   * @param {Drag.StateNames} state
    */
   const transit = (state, args) =>
     update((store) => {

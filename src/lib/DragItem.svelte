@@ -16,7 +16,8 @@
     damping: 0.4,
   });
 
-  const { store, dragEnd } = getContext(key);
+  const { store, dragEnd, strategy } = getContext(key);
+  const { place } = strategy;
 
   store.onTransit(DragStates.dragging, "pre", (store) => {
     if (!isSelected) return;
@@ -55,7 +56,7 @@
         )
       );
     } else {
-      pos.set([0, nextIndex * $store.itemDimension[1]]);
+      pos.set(place({ index: nextIndex, dimension: $store.itemDimension }));
     }
   }
 
