@@ -1,53 +1,62 @@
 declare namespace Drag {
-  type Rect = [number, number, number, number]
-  type Point = [number, number]
-  type Dimension = [number, number]
-  type Axis = 'x' | 'y'
-  type Direction = -1 | 0 | 1
-  type StateNames = 'dragging' | 'idle'
+    type Rect = [number, number, number, number]
+    type Point = [number, number]
+    type Dimension = [number, number]
+    type Axis = 'x' | 'y'
+    type Direction = -1 | 0 | 1
+    type StateNames = 'dragging' | 'idle'
 
-  interface Store {
-    wd: DOMRect
-    itemDimension: Dimension
-    ready: boolean
-    state: StateNames
-    dragIds: Set<string>
-    selectedIds: Set<string>
-    pos: Point
-    offsetPos: Point
-  }
-  
-  interface UnplaceArgs {
-    position: Point;
-    dimension: Dimension;
-    containerDimension: DOMRect;
-    scrollPosition: Point;
-    length: number;
-  }
+    interface Store {
+        wd: DOMRect
+        itemDimension: Dimension
+        ready: boolean
+        state: StateNames
+        dragIds: Set<number>
+        selectedIds: Set<number>
+        pos: Point
+        offsetPos: Point
+    }
 
-  interface PlaceArgs {
-    index: number;
-    dimension: Dimension;
-    containerDimension?: DOMRect;
-  }
+    interface UnplaceArgs {
+        position: Point
+        dimension: Dimension
+        containerDimension: DOMRect
+        scrollPosition: Point
+        length: number
+    }
 
-  interface GetContainerMaxDimensionArgs {
-    size: number;
-    templateDimension: Dimension;
-  }
+    interface PlaceArgs {
+        index: number
+        dimension: Dimension
+        containerDimension?: DOMRect
+    }
 
-  interface AutoScrollArgs {
-    axis: Axis;
-    direction: Direction;
-    scrollPos: any;
-  }
+    interface GetContainerMaxDimensionArgs {
+        size: number
+        templateDimension: Dimension
+    }
 
-  export interface Strategy {
-    place: (args: PlaceArgs) => Point;
-    unplace: (args: UnplaceArgs) => number;
-    getContainerMaxDimension: (
-      args: GetContainerMaxDimensionArgs
-    ) => Dimension;
-    autoScroll: (args: AutoScrollArgs) => void;
-  }
+    interface AutoScrollArgs {
+        axis: Axis
+        direction: Direction
+        scrollPos: any
+    }
+
+    interface CheckVisibilityArgs {
+        index: number
+        itemDimension: Dimension
+        wd: DOMRect
+        scrollPos: Point
+        margin: number
+    }
+
+    export interface Strategy {
+        place: (args: PlaceArgs) => Point
+        unplace: (args: UnplaceArgs) => number
+        getContainerMaxDimension: (
+            args: GetContainerMaxDimensionArgs
+        ) => Dimension
+        autoScroll: (args: AutoScrollArgs) => void
+        checkVisibility?: (args: CheckVisibilityArgs) => boolean
+    }
 }

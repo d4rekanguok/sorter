@@ -1,10 +1,10 @@
 <script>
     import { getContext } from 'svelte'
     import { key } from './context'
-    import { checkVisibility } from './virtualize'
 
     export let index
-    const { store, scrollPos } = getContext(key)
+    const { store, scrollPos, strategy } = getContext(key)
+    const { checkVisibility } = strategy
 
     let isVisible
     $: {

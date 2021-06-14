@@ -44,9 +44,23 @@ const autoScroll = ({ axis, direction, scrollPos }) => {
     }
 }
 
+/** @type {Drag.Strategy['checkVisibility']} */
+const checkVisibility = ({ index, itemDimension, wd, scrollPos, margin }) => {
+    const itemHeight = itemDimension[1]
+    const scrollPosY = scrollPos[1]
+    const top = index * itemHeight
+    const bottom = (index + 1) * itemHeight
+
+    const min = scrollPosY - margin
+    const max = scrollPosY + wd.height + margin
+
+    return (bottom >= min && bottom <= max) || (top <= max && top >= min)
+}
+
 export default createStrategy({
     place,
     unplace,
     getContainerMaxDimension,
     autoScroll,
+    checkVisibility,
 })
