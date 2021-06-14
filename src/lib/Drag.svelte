@@ -9,6 +9,7 @@
 
     /** @type {Drag.Dimension} [width, height] */
     export let itemDimension = [0, 0]
+    export let debug = false
     export let size = 0
     let className
     export { className as class }
@@ -125,13 +126,16 @@
 </script>
 
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
-<pre
-    style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
+
+{#if debug}
+    <pre
+        style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 dropIndex: {$dropIndex}
 cursor: {$store.pos.join(" | ")}
 scrollPos: {$scrollPos.join(" | ")}
 container dimension: {$store.wd?.left} | {$store.wd?.top}
-</pre>
+    </pre>
+{/if}
 
 <div
     class="outer-wrapper {className}"

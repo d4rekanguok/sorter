@@ -1,14 +1,14 @@
 import { createStrategy } from '../createStrategy'
 
 /** @type {Drag.Strategy['place']} */
-export const place = ({ dragItemIndex, containerDimension, dimension }) => {
+export const place = ({ index, containerDimension, dimension }) => {
     const cw = containerDimension.width
     const [w, h] = dimension
 
     const rows = Math.floor(cw / w)
 
-    const x = w * (dragItemIndex % rows)
-    const y = h * Math.floor(dragItemIndex / rows)
+    const x = w * (index % rows)
+    const y = h * Math.floor(index / rows)
     return [x, y]
 }
 

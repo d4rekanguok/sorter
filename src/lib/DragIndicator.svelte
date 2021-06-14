@@ -2,12 +2,9 @@
     import { getContext } from 'svelte'
     import { key } from './context'
 
-    const { store, dropIndex } = getContext(key)
-    $: y =
-        $store.state === 'dragging'
-            ? $store.itemDimension[1] * $dropIndex || 0
-            : 0
-
+    const { store, dropIndex, strategy } = getContext(key)
+    const { place } = strategy
+    $: pos = place({ index: $dropIndex, dimension: $store.itemDimension })
     $: opacity = $store.state === 'dragging' ? 1 : 0
 
 </script>
@@ -16,7 +13,8 @@
     class="indicator-wrapper"
     style={`
     width: ${$store.itemDimension[0]}px;
-    transform: translate(0px, ${y}px);
+    height: ${$store.itemDimension[1]}px;
+    transform: translate(${pos[0]}px, ${pos[1]}px);
     opacity: ${opacity};
 `}
 >
@@ -33,9 +31,12 @@
     }
     .default-indicator {
         position: relative;
-        width: 100%;
+        /* width: 100%; */
+        /* height: 2px; */
+
+        height: 100%;
+        width: 2px;
         background-color: tomato;
-        height: 2px;
     }
 
 </style>

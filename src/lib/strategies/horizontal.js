@@ -1,9 +1,9 @@
 import { createStrategy } from "../createStrategy";
 
 /** @type {Drag.Strategy['place']} */
-const place = ({ dragItemIndex, dimension }) => {
+const place = ({ index, dimension }) => {
     const w = dimension[0]
-    const x = w * dragItemIndex
+    const x = w * index
     return [x, 0]
 }
 
@@ -44,9 +44,23 @@ const autoScroll = ({ axis, direction, scrollPos }) => {
     }
 }
 
+/** @type {Drag.Strategy['checkVisibility']} */
+const checkVisibility = ({ index, itemDimension, wd, scrollPos, margin }) => {
+    const itemWidth = itemDimension[0]
+    const scrollPosX = scrollPos[0]
+    const begin = index * itemWidth
+    const end = (index + 1) * itemWidth
+
+    const min = scrollPosX - margin
+    const max = scrollPosX + wd.width + margin
+
+    return (end >= min && end <= max) || (begin <= max && begin >= min)
+}
+
 export default createStrategy({
     place,
     unplace,
     getContainerMaxDimension,
     autoScroll,
+    checkVisibility,
 })

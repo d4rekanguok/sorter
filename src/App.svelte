@@ -74,8 +74,42 @@
         </pre>
     </div>
 
+    <!-- <div class="drag">
+        <Drag
+            size={data.length}
+            itemDimension={[250, 45]}
+            on:dragend={handleDragEnd}
+        >
+            {#each data as item, index (item.id)}
+                <DragVirtualizer {index}>
+                    <DragItem
+                        {index}
+                        isSelected={selected.has(item.id)}
+                        let:isDragging
+                    >
+                        <Template
+                            {item}
+                            {index}
+                            {isDragging}
+                            isSelected={selected.has(item.id)}
+                            on:select={handleSelect}
+                            on:add={handleAdd}
+                        />
+                    </DragItem>
+                </DragVirtualizer>
+            {/each}
+            <DragIndicator />
+            <DragItem index={data.length} draggable={false}>
+                <button class="add" on:click={handleAdd}>More</button>
+            </DragItem>
+        </Drag>
+    </div> -->
+
+    <h2>Horizontal</h2>
     <div class="drag">
         <Drag
+            debug={true}
+            strategy="horizontal"
             size={data.length}
             itemDimension={[250, 45]}
             on:dragend={handleDragEnd}
@@ -138,9 +172,10 @@
         left: 0.5rem;
     }
 
-    :global(.drag) {
+    .drag {
         width: 100%;
         height: 400px;
+        margin-bottom: 10rem;
     }
 
 </style>
