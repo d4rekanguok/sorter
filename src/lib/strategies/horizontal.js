@@ -36,9 +36,9 @@ const getContainerMaxDimension = ({ size, templateDimension }) => {
 }
 
 /** @type {Drag.Strategy['autoScroll']} */
-const autoScroll = ({ axis, direction, scrollPos }) => {
+const autoScroll = ({ axis, direction, scrollPos, depth }) => {
     if (axis === 'x' && direction !== 0) {
-        scrollPos.start({ direction, axis, delta: 3 })
+        scrollPos.start({ direction, axis, depth, delta: 6 })
     } else {
         scrollPos.stop()
     }

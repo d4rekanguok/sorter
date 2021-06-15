@@ -84,12 +84,12 @@
             store.pos = [x, y]
 
             if (dragIds.size > 0) {
-                const { direction, axis } = detectScrollZone(
+                const { direction, axis, depth } = detectScrollZone(
                     [clientX, clientY],
                     wd,
-                    20
+                    40
                 )
-                autoScroll({ axis, direction, scrollPos })
+                autoScroll({ axis, direction, scrollPos, depth })
             }
 
             return store
