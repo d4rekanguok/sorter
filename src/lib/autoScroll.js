@@ -23,7 +23,7 @@ export const isOverlapped = (p, r, s) => {
     const right = px <= rx + rw
     const top = py >= ry
     const bottom = py <= ry + rh
-    return [top, right, bottom, left].filter((_, i) => i !== s).every(v => v)
+    return [top, right, bottom, left].filter((_, i) => i !== s).every((v) => v)
 }
 
 /**
@@ -40,7 +40,7 @@ export const isOverlapped = (p, r, s) => {
  * @param {number} size
  * @returns {DetectResult}
  */
-export const detectScrollZone = (clientPos, bound, size) => {
+export const detectScrollZone = (clientPos, bound, size = -1) => {
     /** @type {Drag.Direction} */
     let direction = 0
     /** @type {Drag.Axis} */
@@ -80,6 +80,7 @@ export const detectScrollZone = (clientPos, bound, size) => {
 export const createAutoScrollStore = () => {
     let timer = null
     let depth = 0
+    let scrollBound = [0, 0, 0, 0]
 
     /** @type {Point} */
     const initialScrollPos = [0, 0]
@@ -122,9 +123,20 @@ export const createAutoScrollStore = () => {
         let change = delta * direction * depth
 
         return update((scrollPos) => {
-            scrollPos[id] += change
+            const nextScrollPos = scrollPos.slice()
+            nextScrollPos[id] += change
+            if (isOverlapped(nextScrollPos, scrollBound)) {
+                return nextScrollPos
+            }
             return scrollPos
         })
+    }
+
+    /**
+     * @param {Drag.Rect} _scrollBound
+     */
+    const setScrollBound = (_scrollBound) => {
+        scrollBound = _scrollBound
     }
 
     return {
@@ -132,5 +144,6 @@ export const createAutoScrollStore = () => {
         start,
         stop,
         set,
+        setScrollBound,
     }
 }

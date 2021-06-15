@@ -48,10 +48,14 @@
         store.transit(DragStates.idle)
     }
 
-    $: maxDimension = getContainerMaxDimension({
-        size,
-        templateDimension: itemDimension,
-    })
+    let maxDimension
+    $: {
+        maxDimension = getContainerMaxDimension({
+            size,
+            templateDimension: itemDimension,
+        })
+        scrollPos.setScrollBound([0, 0, maxDimension[0], maxDimension[1]])
+    }
 
     setContext(key, {
         store,
