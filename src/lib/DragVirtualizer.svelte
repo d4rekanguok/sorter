@@ -9,7 +9,7 @@
     let isVisible
     $: {
         if ($store.ready) {
-            if ($store.dragIds.has(index)) {
+            if ($store.dragIds.has(index) || $store.selectedIds.has(index)) {
                 isVisible = true
             } else {
                 isVisible = checkVisibility({

@@ -52,7 +52,6 @@ export const createStore = () => {
             }
             if (state === DragStates.idle) {
                 store.dragIds.clear()
-                store.selectedIds.clear()
                 store.pos = [0, 0]
                 store.offsetPos = [0, 0]
                 store.state = DragStates.idle

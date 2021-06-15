@@ -91,7 +91,7 @@ export const createAutoScrollStore = () => {
      * @returns
      */
     const start = (args) => {
-        // treat depth specially so it gets through
+        // treat depth specially so it gets through to move()
         depth = args.depth
         if (timer) return
         loop(args)
