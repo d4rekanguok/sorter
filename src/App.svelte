@@ -20,7 +20,7 @@
 
     /** @type {Data[]} */
     let data = Object.keys(colors)
-        .filter((_, i) => i < 1000)
+        .filter((_, i) => i < 40)
         .map((color) => ({
             id: nanoid(6),
             value: color,
@@ -62,7 +62,7 @@
 </script>
 
 <main>
-    <div class="dev">
+    <!-- <div class="dev">
         <pre
             style="white-space: pre-wrap;">
             {Array.from(selected).map(id => data.find(item => item.id === id).value).join(', ')}
@@ -72,12 +72,12 @@
             style="white-space: pre-wrap;">
             {data.map(v => v.value).join(', ')}
         </pre>
-    </div>
+    </div> -->
 
     <!-- <div class="drag">
         <Drag
             size={data.length}
-            itemDimension={[250, 45]}
+            itemDimension={[180, 110]}
             on:dragend={handleDragEnd}
         >
             {#each data as item, index (item.id)}
@@ -91,6 +91,7 @@
                             {item}
                             {index}
                             {isDragging}
+                            enableAdd={true}
                             isSelected={selected.has(item.id)}
                             on:select={handleSelect}
                             on:add={handleAdd}
@@ -111,7 +112,7 @@
             debug={true}
             strategy="horizontal"
             size={data.length}
-            itemDimension={[250, 45]}
+            itemDimension={[180, 100]}
             on:dragend={handleDragEnd}
         >
             {#each data as item, index (item.id)}
@@ -174,7 +175,7 @@
 
     .drag {
         width: 100%;
-        height: 400px;
+        height: 600px;
         margin-bottom: 10rem;
     }
 

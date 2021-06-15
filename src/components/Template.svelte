@@ -39,8 +39,8 @@
 <style>
     .item {
         position: relative;
-        width: 100%;
-        height: 40px;
+        width: 170px;
+        height: 100px;
         display: flex;
         padding: 0.5rem;
         align-items: center;

@@ -60,6 +60,7 @@ export const autoScroll = ({ axis, direction, scrollPos }) => {
 }
 
 export default createStrategy({
+    name: 'scanline',
     place,
     unplace,
     getContainerMaxDimension,

@@ -36,20 +36,21 @@ const getContainerMaxDimension = ({ size, templateDimension }) => {
 }
 
 /** @type {Drag.Strategy['autoScroll']} */
-const autoScroll = ({ axis, direction, scrollPos }) => {
+const autoScroll = ({ axis, direction, scrollPos, depth }) => {
     if (axis === 'y' && direction !== 0) {
-        scrollPos.start({ direction, axis, delta: 3 })
+        scrollPos.start({ direction, axis, depth, delta: 6 })
     } else {
         scrollPos.stop()
     }
 }
 
 /** @type {Drag.Strategy['checkVisibility']} */
-const checkVisibility = ({ index, itemDimension, wd, scrollPos, margin }) => {
+const checkVisibility = ({ index, itemDimension, wd, scrollPos }) => {
     const itemHeight = itemDimension[1]
     const scrollPosY = scrollPos[1]
     const top = index * itemHeight
     const bottom = (index + 1) * itemHeight
+    const margin = itemHeight * 2
 
     const min = scrollPosY - margin
     const max = scrollPosY + wd.height + margin
@@ -58,6 +59,7 @@ const checkVisibility = ({ index, itemDimension, wd, scrollPos, margin }) => {
 }
 
 export default createStrategy({
+    name: 'vertical',
     place,
     unplace,
     getContainerMaxDimension,

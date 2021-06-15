@@ -3,7 +3,7 @@
     import { key } from './context'
 
     const { store, dropIndex, strategy } = getContext(key)
-    const { place } = strategy
+    const { name = '', place } = strategy
     $: pos = place({ index: $dropIndex, dimension: $store.itemDimension })
     $: opacity = $store.state === 'dragging' ? 1 : 0
 
@@ -19,7 +19,7 @@
 `}
 >
     <slot>
-        <div class="default-indicator" />
+        <div class="default-indicator {name}" />
     </slot>
 </div>
 
@@ -33,10 +33,15 @@
         position: relative;
         /* width: 100%; */
         /* height: 2px; */
-
+        background-color: tomato;
+    }
+    :global(.horizontal).default-indicator {
         height: 100%;
         width: 2px;
-        background-color: tomato;
+    }
+    :global(.vertical).default-indicator {
+        width: 100%;
+        height: 2px;
     }
 
 </style>

@@ -17,7 +17,6 @@
                     itemDimension: $store.itemDimension,
                     wd: $store.wd,
                     scrollPos: $scrollPos,
-                    margin: 200,
                 })
             }
         } else {
