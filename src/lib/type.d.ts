@@ -51,6 +51,7 @@ declare namespace Drag {
     }
 
     export interface Strategy {
+        name?: string
         place: (args: PlaceArgs) => Point
         unplace: (args: UnplaceArgs) => number
         getContainerMaxDimension: (
