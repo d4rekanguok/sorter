@@ -62,6 +62,7 @@
         dragEnd,
         dropIndex,
         scrollPos,
+        debug,
         strategy: _strategy,
     })
 
@@ -126,7 +127,6 @@
     }
 
     $: handleWrapperAutoScroll($scrollPos)
-
 </script>
 
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
@@ -180,5 +180,4 @@ container dimension: {$store.wd?.left} | {$store.wd?.top}
         background-color: pink;
         border-radius: 100px;
     }
-
 </style>

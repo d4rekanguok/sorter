@@ -17,7 +17,7 @@
         damping: 0.4,
     })
 
-    const { store, dragEnd, strategy } = getContext(key)
+    const { store, dragEnd, strategy, debug } = getContext(key)
     const { place } = strategy
 
     $: if (isSelected) {
@@ -108,7 +108,6 @@
         document.removeEventListener('mouseup', handleMouseUp)
         dragEnd()
     }
-
 </script>
 
 {#if $store.ready}
@@ -126,6 +125,9 @@
   transform: translate(${$pos[0]}px, ${$pos[1]}px);
 `}
     >
+        {#if debug}
+            <div class="dev">{$pos.join(' | ')}</div>
+        {/if}
         <slot isDragging={$store.dragIds.has(index)} />
     </div>
 {/if}
@@ -137,4 +139,10 @@
         left: auto;
     }
 
+    .dev {
+        position: absolute;
+        z-index: 100;
+        right: 1rem;
+        font-size: 0.8rem;
+    }
 </style>
