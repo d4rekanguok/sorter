@@ -1,4 +1,4 @@
-import { removeItemsFromArray } from './removeItems'
+import { removeItemsFromArray } from './removeItems.js'
 
 /**
  * Reorder data *in place*.

@@ -1,6 +1,6 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
-import { reorder } from './reorder'
+import { reorder } from './reorder.js'
 
 test('reorder a single item', () => {
     const array = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
