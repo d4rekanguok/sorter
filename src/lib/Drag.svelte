@@ -11,7 +11,7 @@
     export let itemDimension = [0, 0]
     export let debug = false
     export let size = 0
-    let className
+    let className = ''
     export { className as class }
     export let strategy = 'vertical'
 
