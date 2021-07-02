@@ -8,8 +8,8 @@
         DragIndicator,
         DragVirtualizer,
         reorder,
-    } from './lib'
-    import Template from './components/Template.svelte'
+    } from '$lib'
+    import Template from '$components/Template.svelte'
 
     /**
      * @typedef Data
@@ -58,7 +58,6 @@
         })
         data = data
     }
-
 </script>
 
 <main>
@@ -167,16 +166,9 @@
         border-radius: 4px;
     }
 
-    .dev {
-        position: fixed;
-        top: 0.5rem;
-        left: 0.5rem;
-    }
-
     .drag {
         width: 100%;
         height: 600px;
         margin-bottom: 10rem;
     }
-
 </style>

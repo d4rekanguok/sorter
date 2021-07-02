@@ -23,7 +23,6 @@
             isVisible = false
         }
     }
-
 </script>
 
 {#if isVisible}

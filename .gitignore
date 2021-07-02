@@ -1,5 +1,7 @@
-/node_modules/
 /dist/
 /.vscode/
 .DS_Store
 /lib
+node_modules
+/.svelte-kit
+/package

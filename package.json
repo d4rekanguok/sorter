@@ -4,29 +4,27 @@
     "dist",
     "lib"
   ],
-  "svelte": "lib/index.ts",
+  "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "build:svelte": "rm -rf ./lib && cp -R ./src/lib ./lib",
+    "dev": "svelte-kit dev",
+    "build": "svelte-kit build",
+    "preview": "svelte-kit preview",
     "test:file": "node -r esm -r ts-node/register",
-    "prepublishOnly": "vite build && yarn build:svelte"
+    "lint": "prettier --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
+    "format": "prettier --write --plugin-search-dir=. ."
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "next",
-    "css-color-names": "^1.0.1",
-    "eslint": "^7.28.0",
+    "@sveltejs/kit": "next",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-svelte3": "^3.2.0",
+    "prettier-plugin-svelte": "^2.2.0",
+    "css-color-names": "^1.0.1",
     "esm": "^3.2.25",
     "nanoid": "^3.1.22",
     "prettier": "^2.3.1",
     "svelte": "^3.35.0",
-    "svelte-preprocess": "^4.6.9",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.3",
-    "uvu": "^0.5.1",
-    "vite": "^2.1.5"
+    "uvu": "^0.5.1"
   }
 }
