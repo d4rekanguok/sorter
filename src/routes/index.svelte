@@ -31,7 +31,6 @@
 
     const handleSelect = ({ detail }) => {
         const { id, isSelected } = detail
-        console.log(id, isSelected)
         if (isSelected) {
             selected.add(id)
         } else {

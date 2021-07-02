@@ -17,7 +17,7 @@
         damping: 0.4,
     })
 
-    const { store, dragEnd, strategy, debug } = getContext(key)
+    const { store, dragEnd, strategy, debug, scrollPos } = getContext(key)
     const { place } = strategy
 
     $: if (isSelected) {
@@ -42,6 +42,7 @@
                     $store.pos,
                     $store.offsetPos,
                     [window.scrollX, window.scrollY],
+                    $scrollPos,
                     i
                 )
             )
@@ -69,12 +70,23 @@
      * @param {[number, number]} pos
      * @param {[number, number]} offsetPos
      * @param {[number, number]} globalScrollPos scrollX, scrollY
+     * @param {[number, number]} localScrollPos
      * @param {number} i
      * @returns {[number, number]}
      */
-    const getPos = (pos, offsetPos, globalScrollPos, i = 0) => {
-        const x = pos[0] - offsetPos[0] - globalScrollPos[0] - i * 10
-        const y = pos[1] - offsetPos[1] - globalScrollPos[0] - i * 10
+    const getPos = (pos, offsetPos, globalScrollPos, localScrollPos, i = 0) => {
+        const x =
+            pos[0] -
+            offsetPos[0] -
+            globalScrollPos[0] +
+            localScrollPos[0] -
+            i * 10
+        const y =
+            pos[1] -
+            offsetPos[1] -
+            globalScrollPos[1] +
+            localScrollPos[1] -
+            i * 10
         return [x, y]
     }
 
@@ -108,6 +120,10 @@
         document.removeEventListener('mouseup', handleMouseUp)
         dragEnd()
     }
+
+    $: isDragging = $store.dragIds.has(index)
+    $: posX = isDragging ? $pos[0] - $scrollPos[0] : $pos[0]
+    $: posY = isDragging ? $pos[1] - $scrollPos[1] : $pos[1]
 </script>
 
 {#if $store.ready}
@@ -120,9 +136,9 @@
         style={`
   width: ${$store.itemDimension[0]}px;
   height: ${$store.itemDimension[1]}px;
-  position: ${$store.dragIds.has(index) ? 'fixed' : 'absolute'};
-  z-index: ${$store.dragIds.has(index) ? '10' : '1'};
-  transform: translate(${$pos[0]}px, ${$pos[1]}px);
+  position: ${isDragging ? 'fixed' : 'absolute'};
+  z-index: ${isDragging ? '10' : '1'};
+  transform: translate(${posX}px, ${posY}px);
 `}
     >
         {#if debug}
