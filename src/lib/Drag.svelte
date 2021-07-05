@@ -18,10 +18,11 @@
     const _strategy =
         typeof strategy === 'string' ? defaultStrategies[strategy] : strategy
 
-    const { unplace, getContainerMaxDimension, autoScroll } = _strategy
+    const { unplace, getContainerMaxDimension, autoScroll, getWheelDistance } =
+        _strategy
 
     /** @type {HTMLDivElement} */
-    let ref
+    export let ref
 
     const store = createStore()
     const scrollPos = createAutoScrollStore()
@@ -126,6 +127,15 @@
         ref.scrollLeft = x
     }
 
+    const handleScrollWheel = getWheelDistance
+        ? (e) => {
+              const distance = getWheelDistance({
+                  delta: [e.deltaX, e.deltaY],
+              })
+              ref.scrollTo(...distance)
+          }
+        : null
+
     $: handleWrapperAutoScroll($scrollPos)
 </script>
 
@@ -145,6 +155,7 @@ container dimension: {$store.wd?.left} | {$store.wd?.top}
     class="outer-wrapper {className}"
     bind:this={ref}
     on:scroll={handleWrapperScroll}
+    on:wheel={handleScrollWheel}
 >
     <div
         class="inner-wrapper"
