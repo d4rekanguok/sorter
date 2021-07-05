@@ -141,13 +141,13 @@
 
 <svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
 
-{#if debug}
+{#if debug && $store.ready}
     <pre
         style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 dropIndex: {$dropIndex}
 cursor: {$store.pos.join(" | ")}
 scrollPos: {$scrollPos.join(" | ")}
-container dimension: {$store.wd?.left} | {$store.wd?.top}
+container dimension: {$store.wd.left} | {$store.wd.top}
     </pre>
 {/if}
 
