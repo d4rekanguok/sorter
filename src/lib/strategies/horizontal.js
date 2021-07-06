@@ -58,11 +58,6 @@ const checkVisibility = ({ index, itemDimension, wd, scrollPos }) => {
     return (end >= min && end <= max) || (begin <= max && begin >= min)
 }
 
-const getWheelDistance = ({ delta }) => {
-    const d = delta[0] || delta[1]
-    return [d * 0.5, 0]
-}
-
 export default createStrategy({
     name: 'horizontal',
     place,
@@ -70,5 +65,4 @@ export default createStrategy({
     getContainerMaxDimension,
     autoScroll,
     checkVisibility,
-    getWheelDistance,
 })

@@ -59,6 +59,5 @@ declare namespace Drag {
         ) => Dimension
         autoScroll: (args: AutoScrollArgs) => void
         checkVisibility?: (args: CheckVisibilityArgs) => boolean
-        getWheelDistance?: (args: { delta: Point }) => Point
     }
 }
