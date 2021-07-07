@@ -66,6 +66,8 @@
         strategy: _strategy,
     })
 
+    $: $store.itemDimension = itemDimension
+
     onMount(() => {
         store.update((store) => {
             if (!ref) return store

@@ -57,6 +57,15 @@
         })
         data = data
     }
+
+    const itemDimensions = [
+        [180, 100],
+        [120, 120],
+    ]
+    let itemDimensionId = 0
+    const handleChangeSize = () => {
+        itemDimensionId = (itemDimensionId + 1) % itemDimensions.length
+    }
 </script>
 
 <main>
@@ -105,12 +114,13 @@
     </div> -->
 
     <h2>Horizontal</h2>
+    <button on:click={handleChangeSize}>Change Size</button>
     <div class="drag">
         <Drag
             debug={true}
             strategy="horizontal"
             size={data.length}
-            itemDimension={[180, 100]}
+            itemDimension={itemDimensions[itemDimensionId]}
             on:dragend={handleDragEnd}
         >
             {#each data as item, index (item.id)}

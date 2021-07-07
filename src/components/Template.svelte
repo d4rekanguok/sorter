@@ -22,7 +22,6 @@
     }
 
     const { value } = item
-
 </script>
 
 <div class="item" style="--color: {value};" class:isDragging>
@@ -39,8 +38,8 @@
 <style>
     .item {
         position: relative;
-        width: 170px;
-        height: 100px;
+        width: calc(100% - 10px);
+        height: 100%;
         display: flex;
         padding: 0.5rem;
         align-items: center;
@@ -81,5 +80,4 @@
     .item.isDragging {
         box-shadow: 0 15px 20px -10px rgba(0, 0, 0, 0.25);
     }
-
 </style>

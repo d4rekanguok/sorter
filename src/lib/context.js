@@ -21,7 +21,7 @@ export const createStore = () => {
         offsetPos: [0, 0],
     }
 
-    const { subscribe, update } = writable(initialStore)
+    const { subscribe, update, set } = writable(initialStore)
 
     /**
      * Transition into a new state
@@ -101,5 +101,5 @@ export const createStore = () => {
         }
     }
 
-    return { subscribe, update, transit, dragUntil }
+    return { subscribe, update, transit, dragUntil, set }
 }
