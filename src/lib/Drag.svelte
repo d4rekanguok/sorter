@@ -179,7 +179,7 @@ container dimension: {$store.wd.left} | {$store.wd.top}
     }
 
     .outer-wrapper::-webkit-scrollbar-thumb {
-        background-color: pink;
+        background-color: var(--sds-color-scrollbar, pink);
         border-radius: 100px;
     }
 </style>

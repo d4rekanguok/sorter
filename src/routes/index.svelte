@@ -115,7 +115,7 @@
 
     <h2>Horizontal</h2>
     <button on:click={handleChangeSize}>Change Size</button>
-    <div class="drag">
+    <div class="drag" style="--sds-color-scrollbar: red;">
         <Drag
             debug={true}
             strategy="horizontal"

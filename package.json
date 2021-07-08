@@ -1,27 +1,27 @@
 {
   "name": "svelte-drag-sorter",
   "type": "module",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "scripts": {
     "dev": "svelte-kit dev",
     "build": "svelte-kit build",
     "preview": "svelte-kit preview",
     "test:file": "node",
     "package": "svelte-kit package && yalc push ./package",
-    "publish": "npm publish ./package/",
+    "pub": "npm publish ./package/",
     "lint": "prettier --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier --write --plugin-search-dir=. ."
   },
   "devDependencies": {
     "@sveltejs/kit": "next",
+    "css-color-names": "^1.0.1",
     "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-svelte3": "^3.2.0",
-    "prettier-plugin-svelte": "^2.2.0",
-    "css-color-names": "^1.0.1",
     "esm": "^3.2.25",
     "nanoid": "^3.1.22",
     "prettier": "^2.3.1",
+    "prettier-plugin-svelte": "^2.2.0",
     "svelte": "^3.35.0",
     "uvu": "^0.5.1"
   }
