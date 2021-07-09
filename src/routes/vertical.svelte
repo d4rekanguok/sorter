@@ -9,7 +9,7 @@
         DragVirtualizer,
         reorder,
     } from '$lib'
-    import Template from '$components/Template.svelte'
+    import TemplateClick from '$components/TemplateClick.svelte'
 
     /**
      * @typedef Data
@@ -70,48 +70,16 @@
 
 <main>
     <!-- <div class="dev">
-        <pre
-            style="white-space: pre-wrap;">
-            {Array.from(selected).map(id => data.find(item => item.id === id).value).join(', ')}
-        </pre>
+      <pre
+          style="white-space: pre-wrap;">
+          {Array.from(selected).map(id => data.find(item => item.id === id).value).join(', ')}
+      </pre>
 
-        <pre
-            style="white-space: pre-wrap;">
-            {data.map(v => v.value).join(', ')}
-        </pre>
-    </div> -->
-
-    <!-- <div class="drag">
-        <Drag
-            size={data.length}
-            itemDimension={[180, 110]}
-            on:dragend={handleDragEnd}
-        >
-            {#each data as item, index (item.id)}
-                <DragVirtualizer {index}>
-                    <DragItem
-                        {index}
-                        isSelected={selected.has(item.id)}
-                        let:isDragging
-                    >
-                        <Template
-                            {item}
-                            {index}
-                            {isDragging}
-                            enableAdd={true}
-                            isSelected={selected.has(item.id)}
-                            on:select={handleSelect}
-                            on:add={handleAdd}
-                        />
-                    </DragItem>
-                </DragVirtualizer>
-            {/each}
-            <DragIndicator />
-            <DragItem index={data.length} draggable={false}>
-                <button class="add" on:click={handleAdd}>More</button>
-            </DragItem>
-        </Drag>
-    </div> -->
+      <pre
+          style="white-space: pre-wrap;">
+          {data.map(v => v.value).join(', ')}
+      </pre>
+  </div> -->
 
     <h2>Horizontal</h2>
     <button on:click={handleChangeSize}>Change Size</button>
@@ -119,7 +87,7 @@
         <Drag
             debug={true}
             class="test-drag"
-            strategy="horizontal"
+            strategy="vertical"
             size={data.length}
             itemDimension={itemDimensions[itemDimensionId]}
             on:dragend={handleDragEnd}
@@ -131,7 +99,7 @@
                         isSelected={selected.has(item.id)}
                         let:isDragging
                     >
-                        <Template
+                        <TemplateClick
                             {item}
                             {index}
                             {isDragging}

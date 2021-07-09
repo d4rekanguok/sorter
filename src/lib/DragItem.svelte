@@ -96,7 +96,7 @@
         try {
             const { abort, promise } = store.dragUntil(10)
             _abortDragPromise = abort
-            document.addEventListener('mouseup', handleMouseUpAbort)
+            document.addEventListener('mouseup', handleMouseUpAbort, true)
             await promise
 
             const { offsetX, offsetY } = e
@@ -105,19 +105,21 @@
                 offsetPos: [offsetX, offsetY],
             })
 
-            document.addEventListener('mouseup', handleMouseUp)
+            document.addEventListener('mouseup', handleMouseUp, true)
         } catch (e) {
             return
         }
     }
 
-    const handleMouseUpAbort = () => {
+    const handleMouseUpAbort = (e) => {
+        e.stopPropagation()
         if (_abortDragPromise) _abortDragPromise()
-        document.removeEventListener('mouseup', handleMouseUpAbort)
+        document.removeEventListener('mouseup', handleMouseUpAbort, true)
     }
 
-    const handleMouseUp = () => {
-        document.removeEventListener('mouseup', handleMouseUp)
+    const handleMouseUp = (e) => {
+        e.stopPropagation()
+        document.removeEventListener('mouseup', handleMouseUp, true)
         dragEnd()
     }
 
@@ -128,7 +130,7 @@
 
 {#if $store.ready}
     <div
-        on:mousedown|preventDefault|stopPropagation={handleMouseDown}
+        on:mousedown|preventDefault|stopPropagation|capture={handleMouseDown}
         on:dragstart|preventDefault|stopPropagation={() => null}
         on:drop|preventDefault={() => null}
         on:dragover|preventDefault={() => null}
