@@ -69,7 +69,10 @@
             if (!ref) return store
 
             store.wd = ref.getBoundingClientRect()
-            store.originWd = store.wd
+            store.originWd = {
+                top: store.wd.top + window.scrollY,
+                left: store.wd.left + window.scrollX,
+            }
             store.itemDimension = itemDimension
             store.ready = true
 
