@@ -32,20 +32,17 @@
             nextIndex = index
         }
 
+        const nextPos = place({
+            index: nextIndex,
+            dimension: $store.itemDimension,
+        })
+
         if ($store.dragIds.has(index)) {
             const i = Array.from($store.dragIds)
                 .sort((a, b) => a - b)
                 .indexOf(index)
 
-            pos.set(
-                getPos(
-                    $store.pos,
-                    $store.offsetPos,
-                    $store.wd,
-                    [window.scrollX, window.scrollY],
-                    i
-                )
-            )
+            pos.set(getPos(nextPos, $store.pos, $store.originPos, i))
         } else {
             const { dragIds } = $store
             if (dragIds.size !== _dragIdSize) {
@@ -59,9 +56,7 @@
                 _dragIdSize = dragIds.size
             }
 
-            pos.set(
-                place({ index: nextIndex, dimension: $store.itemDimension })
-            )
+            pos.set(nextPos)
         }
     }
 
@@ -73,9 +68,9 @@
      * @param {number} i
      * @returns {[number, number]}
      */
-    const getPos = (pos, offsetPos, wd, globalScrollPos, i = 0) => {
-        const x = pos[0] - offsetPos[0] - wd.left - globalScrollPos[0] + i * 10
-        const y = pos[1] - offsetPos[1] - wd.top - globalScrollPos[1] + i * 10
+    const getPos = (nextPos, pos, originPos, i = 0) => {
+        const x = nextPos[0] + (pos[0] - originPos[0]) + i * 10
+        const y = nextPos[1] + (pos[1] - originPos[1]) + i * 10
         return [x, y]
     }
 
@@ -88,10 +83,10 @@
             document.addEventListener('mouseup', handleMouseUpAbort, true)
             await promise
 
-            const { offsetX, offsetY } = e
+            const { clientX, clientY } = e
             store.transit(DragStates.dragging, {
                 dragId: index,
-                offsetPos: [offsetX, offsetY],
+                originPos: [clientX, clientY],
             })
 
             document.addEventListener('mouseup', handleMouseUp, true)
@@ -113,7 +108,12 @@
     }
 
     $: isDragging = $store.dragIds.has(index)
-    $: [posX, posY] = $pos
+    $: posX = isDragging
+        ? $pos[0] + ($store.wd?.left - ($store.originWd?.left || 0))
+        : $pos[0]
+    $: posY = isDragging
+        ? $pos[1] + ($store.wd?.top - ($store.originWd?.top || 0))
+        : $pos[1]
 </script>
 
 {#if $store.ready}

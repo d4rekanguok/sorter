@@ -69,6 +69,7 @@
             if (!ref) return store
 
             store.wd = ref.getBoundingClientRect()
+            store.originWd = ref.getBoundingClientRect()
             store.itemDimension = itemDimension
             store.ready = true
 
@@ -125,6 +126,8 @@
 dropIndex: {$dropIndex}
 cursor: {$store.pos.join(" | ")}
 container dimension: {$store.wd.left} | {$store.wd.top}
+container dimension: {$store.originWd.left} | {$store.originWd.top}
+container dimension: {$store.wd.left - $store.originWd.left} | {$store.wd.top - $store.originWd.top}
     </pre>
 {/if}
 

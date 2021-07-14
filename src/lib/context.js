@@ -12,13 +12,14 @@ export const createStore = () => {
     /** @type {Drag.Store} */
     const initialStore = {
         wd: null,
+        originWd: null,
         itemDimension: [0, 0],
         ready: false,
         state: DragStates.idle,
         dragIds: new Set(),
         selectedIds: new Set(),
         pos: [0, 0],
-        offsetPos: [0, 0],
+        originPos: [0, 0],
     }
 
 
@@ -53,7 +54,7 @@ export const createStore = () => {
             }
 
             if (state === DragStates.dragging) {
-                const { dragId, offsetPos } = args
+                const { dragId, originPos } = args
                 const { dragIds, selectedIds } = store
                 if (selectedIds.has(dragId)) {
                     selectedIds.forEach((v) => {
@@ -63,14 +64,14 @@ export const createStore = () => {
                     dragIds.add(dragId)
                 }
 
-                store.offsetPos = offsetPos
+                store.originPos = originPos
                 store.state = DragStates.dragging
 
             }
             if (state === DragStates.idle) {
                 store.dragIds.clear()
                 store.pos = [0, 0]
-                store.offsetPos = [0, 0]
+                store.originPos = [0, 0]
                 store.state = DragStates.idle
             }
 
