@@ -3,7 +3,6 @@
     import { derived } from 'svelte/store'
     import { key, createStore, DragStates } from './context'
     import { defaultStrategies } from './strategies'
-    import { detectScrollZone, createAutoScrollStore } from './autoScroll'
 
     const dispatch = createEventDispatcher()
 
@@ -18,18 +17,16 @@
     const _strategy =
         typeof strategy === 'string' ? defaultStrategies[strategy] : strategy
 
-    const { unplace, getContainerMaxDimension, autoScroll } = _strategy
+    const { unplace, getContainerMaxDimension } = _strategy
 
     /** @type {HTMLDivElement} */
     export let ref
 
     const store = createStore()
-    const scrollPos = createAutoScrollStore()
-    const dropIndex = derived([store, scrollPos], ([_store, _scrollPos]) => {
+    const dropIndex = derived(store, (_store) => {
         return _store.dragIds.size > 0
             ? unplace({
                   position: _store.pos,
-                  scrollPosition: _scrollPos,
                   dimension: _store.itemDimension,
                   containerDimension: _store.wd,
                   length: size,
@@ -54,14 +51,13 @@
             size,
             templateDimension: itemDimension,
         })
-        scrollPos.setScrollBound([0, 0, maxDimension[0], maxDimension[1]])
+        // scrollPos.setScrollBound([0, 0, maxDimension[0], maxDimension[1]])
     }
 
     setContext(key, {
         store,
         dragEnd,
         dropIndex,
-        scrollPos,
         debug,
         strategy: _strategy,
     })
@@ -82,50 +78,37 @@
 
     const handleMove = (e) => {
         const { clientX, clientY } = e
-        store.update((store) => {
-            const { wd, dragIds } = store
-            const { left: offsetX, top: offsetY } = wd
-            const x = clientX - offsetX
-            const y = clientY - offsetY
-
-            store.pos = [x, y]
-
-            if (dragIds.size > 0) {
-                const { direction, axis, depth } = detectScrollZone(
-                    [clientX, clientY],
-                    wd,
-                    40
-                )
-                autoScroll({ axis, direction, scrollPos, depth })
-            }
-
-            return store
-        })
+        // const { left: offsetX, top: offsetY } = $store.wd
+        // const x = clientX - offsetX
+        // const y = clientY - offsetY
+        $store.pos = [clientX, clientY]
     }
 
     const recalculateWrapperDimension = () => {
         $store.wd = ref.getBoundingClientRect()
     }
 
-    const handleWrapperScroll = () => {
-        if (!ref) return
-        const y = ref.scrollTop
-        const x = ref.scrollLeft
+    // const handleWrapperScroll = () => {
+    //     if (!ref) return
+    //     const y = ref.scrollTop
+    //     const x = ref.scrollLeft
 
-        if ($store.dragIds.size == 0) {
-            scrollPos.stop()
-        }
+    //     if ($store.dragIds.size == 0) {
+    //         scrollPos.stop()
+    //     }
 
-        scrollPos.set([x, y])
-    }
+    //     scrollPos.set([x, y])
+    // }
 
-    const handleWrapperAutoScroll = ([x, y]) => {
-        if (!ref) return
-        ref.scrollTop = y
-        ref.scrollLeft = x
-    }
+    // const handleWrapperAutoScroll = ([x, y]) => {
+    //     if (!ref) return
+    //     ref.scrollTop = y
+    //     ref.scrollLeft = x
+    // }
 
-    $: handleWrapperAutoScroll($scrollPos)
+    // $: handleWrapperAutoScroll($scrollPos)
+
+    store.on('dragging', () => recalculateWrapperDimension())
 </script>
 
 <svelte:window
@@ -141,50 +124,21 @@
         style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 dropIndex: {$dropIndex}
 cursor: {$store.pos.join(" | ")}
-scrollPos: {$scrollPos.join(" | ")}
 container dimension: {$store.wd.left} | {$store.wd.top}
     </pre>
 {/if}
 
 <div
-    class="outer-wrapper {className}"
     bind:this={ref}
-    on:scroll={handleWrapperScroll}
-    on:mouseenter={recalculateWrapperDimension}
+    class="inner-wrapper"
+    style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
 >
-    <div
-        class="inner-wrapper"
-        style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
-    >
-        <slot />
-    </div>
+    <slot />
 </div>
 
 <style>
     .inner-wrapper {
         position: relative;
-    }
-
-    .outer-wrapper {
-        position: relative;
-        overflow: scroll;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-    }
-
-    .outer-wrapper::-webkit-scrollbar {
-        width: 3px;
-        height: 3px;
-    }
-
-    .outer-wrapper::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .outer-wrapper::-webkit-scrollbar-thumb {
-        background-color: var(--sds-color-scrollbar, pink);
-        border-radius: 100px;
     }
 
     .debug-recalc {

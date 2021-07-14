@@ -12,17 +12,15 @@ const unplace = ({
     position,
     dimension,
     containerDimension,
-    scrollPosition,
     length,
 }) => {
-    const y = position[1] + scrollPosition[1]
+    const y = position[1]
     const h = dimension[1]
-    const offsetY = scrollPosition[1]
 
-    const start = Math.ceil(offsetY / h)
+    const start = Math.ceil(y / h)
     const end = Math.min(
         length,
-        Math.floor((offsetY + containerDimension.height) / h)
+        Math.floor((y + containerDimension.height) / h)
     )
 
     const i = Math.round(y / h)
@@ -45,15 +43,14 @@ const autoScroll = ({ axis, direction, scrollPos, depth }) => {
 }
 
 /** @type {Drag.Strategy['checkVisibility']} */
-const checkVisibility = ({ index, itemDimension, wd, scrollPos }) => {
+const checkVisibility = ({ index, itemDimension, wd }) => {
     const itemHeight = itemDimension[1]
-    const scrollPosY = scrollPos[1]
     const top = index * itemHeight
     const bottom = (index + 1) * itemHeight
     const margin = itemHeight * 2
 
-    const min = scrollPosY - margin
-    const max = scrollPosY + wd.height + margin
+    const min = margin
+    const max = wd.height + margin
 
     return (bottom >= min && bottom <= max) || (top <= max && top >= min)
 }

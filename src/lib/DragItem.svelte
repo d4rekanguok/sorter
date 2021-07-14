@@ -17,7 +17,7 @@
         damping: 0.4,
     })
 
-    const { store, dragEnd, strategy, debug, scrollPos } = getContext(key)
+    const { store, dragEnd, strategy, debug } = getContext(key)
     const { place } = strategy
 
     $: if (isSelected) {
@@ -41,8 +41,8 @@
                 getPos(
                     $store.pos,
                     $store.offsetPos,
+                    $store.wd,
                     [window.scrollX, window.scrollY],
-                    $scrollPos,
                     i
                 )
             )
@@ -70,23 +70,12 @@
      * @param {[number, number]} pos
      * @param {[number, number]} offsetPos
      * @param {[number, number]} globalScrollPos scrollX, scrollY
-     * @param {[number, number]} localScrollPos
      * @param {number} i
      * @returns {[number, number]}
      */
-    const getPos = (pos, offsetPos, globalScrollPos, localScrollPos, i = 0) => {
-        const x =
-            pos[0] -
-            offsetPos[0] -
-            globalScrollPos[0] +
-            localScrollPos[0] -
-            i * 10
-        const y =
-            pos[1] -
-            offsetPos[1] -
-            globalScrollPos[1] +
-            localScrollPos[1] -
-            i * 10
+    const getPos = (pos, offsetPos, wd, globalScrollPos, i = 0) => {
+        const x = pos[0] - offsetPos[0] - wd.left - globalScrollPos[0] + i * 10
+        const y = pos[1] - offsetPos[1] - wd.top - globalScrollPos[1] + i * 10
         return [x, y]
     }
 
@@ -124,8 +113,7 @@
     }
 
     $: isDragging = $store.dragIds.has(index)
-    $: posX = isDragging ? $pos[0] - $scrollPos[0] : $pos[0]
-    $: posY = isDragging ? $pos[1] - $scrollPos[1] : $pos[1]
+    $: [posX, posY] = $pos
 </script>
 
 {#if $store.ready}

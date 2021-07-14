@@ -21,7 +21,23 @@ export const createStore = () => {
         offsetPos: [0, 0],
     }
 
+
     const { subscribe, update, set } = writable(initialStore)
+
+    let listeners = []
+
+    const on = (eventName, callback) => {
+        callback.__eventName = eventName
+        listeners.push(callback)
+    }
+
+    const runListeners = (store, eventName) => {
+        listeners.forEach(cb => {
+            if (cb.__eventName === eventName) {
+                cb(store)
+            }
+        })
+    }
 
     /**
      * Transition into a new state
@@ -49,6 +65,7 @@ export const createStore = () => {
 
                 store.offsetPos = offsetPos
                 store.state = DragStates.dragging
+
             }
             if (state === DragStates.idle) {
                 store.dragIds.clear()
@@ -57,6 +74,7 @@ export const createStore = () => {
                 store.state = DragStates.idle
             }
 
+            runListeners(store, state)
             return store
         })
 
@@ -101,5 +119,14 @@ export const createStore = () => {
         }
     }
 
-    return { subscribe, update, transit, dragUntil, set }
+    const subscribeAll = (...args) => {
+        const unsubStore = subscribe(...args)
+        return () => {
+            unsubStore()
+            listeners = []
+        }
+
+    }
+
+    return { subscribe: subscribeAll, update, transit, dragUntil, set, on }
 }

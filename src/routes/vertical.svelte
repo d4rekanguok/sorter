@@ -6,7 +6,7 @@
         Drag,
         DragItem,
         DragIndicator,
-        DragVirtualizer,
+        // DragVirtualizer,
         reorder,
     } from '$lib'
     import TemplateClick from '$components/TemplateClick.svelte'
@@ -94,22 +94,20 @@
                 on:dragend={handleDragEnd}
             >
                 {#each data as item, index (item.id)}
-                    <DragVirtualizer {index}>
-                        <DragItem
+                    <DragItem
+                        {index}
+                        isSelected={selected.has(item.id)}
+                        let:isDragging
+                    >
+                        <TemplateClick
+                            {item}
                             {index}
+                            {isDragging}
                             isSelected={selected.has(item.id)}
-                            let:isDragging
-                        >
-                            <TemplateClick
-                                {item}
-                                {index}
-                                {isDragging}
-                                isSelected={selected.has(item.id)}
-                                on:select={handleSelect}
-                                on:add={handleAdd}
-                            />
-                        </DragItem>
-                    </DragVirtualizer>
+                            on:select={handleSelect}
+                            on:add={handleAdd}
+                        />
+                    </DragItem>
                 {/each}
                 <DragIndicator />
                 <DragItem index={data.length} draggable={false}>
