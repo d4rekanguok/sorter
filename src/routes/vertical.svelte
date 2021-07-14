@@ -81,40 +81,42 @@
       </pre>
   </div> -->
 
-    <h2>Horizontal</h2>
-    <button on:click={handleChangeSize}>Change Size</button>
-    <div class="drag" style="--sds-color-scrollbar: tomato;">
-        <Drag
-            debug={true}
-            class="test-drag"
-            strategy="vertical"
-            size={data.length}
-            itemDimension={itemDimensions[itemDimensionId]}
-            on:dragend={handleDragEnd}
-        >
-            {#each data as item, index (item.id)}
-                <DragVirtualizer {index}>
-                    <DragItem
-                        {index}
-                        isSelected={selected.has(item.id)}
-                        let:isDragging
-                    >
-                        <TemplateClick
-                            {item}
+    <div class="wrapper">
+        <h2>Horizontal</h2>
+        <button on:click={handleChangeSize}>Change Size</button>
+        <div class="drag" style="--sds-color-scrollbar: tomato;">
+            <Drag
+                debug={true}
+                class="test-drag"
+                strategy="vertical"
+                size={data.length}
+                itemDimension={itemDimensions[itemDimensionId]}
+                on:dragend={handleDragEnd}
+            >
+                {#each data as item, index (item.id)}
+                    <DragVirtualizer {index}>
+                        <DragItem
                             {index}
-                            {isDragging}
                             isSelected={selected.has(item.id)}
-                            on:select={handleSelect}
-                            on:add={handleAdd}
-                        />
-                    </DragItem>
-                </DragVirtualizer>
-            {/each}
-            <DragIndicator />
-            <DragItem index={data.length} draggable={false}>
-                <button class="add" on:click={handleAdd}>More</button>
-            </DragItem>
-        </Drag>
+                            let:isDragging
+                        >
+                            <TemplateClick
+                                {item}
+                                {index}
+                                {isDragging}
+                                isSelected={selected.has(item.id)}
+                                on:select={handleSelect}
+                                on:add={handleAdd}
+                            />
+                        </DragItem>
+                    </DragVirtualizer>
+                {/each}
+                <DragIndicator />
+                <DragItem index={data.length} draggable={false}>
+                    <button class="add" on:click={handleAdd}>More</button>
+                </DragItem>
+            </Drag>
+        </div>
     </div>
 </main>
 
@@ -135,6 +137,14 @@
         max-width: 60rem;
     }
 
+    .wrapper {
+        overflow: scroll;
+        height: 50vh;
+        width: 200px;
+        border-radius: 8px;
+        border: 1px solid skyblue;
+    }
+
     .add {
         width: 100%;
         height: 28px;
@@ -146,7 +156,5 @@
 
     .drag {
         width: 100%;
-        height: 600px;
-        margin-bottom: 10rem;
     }
 </style>

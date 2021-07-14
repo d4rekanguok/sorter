@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.5.0",
   "scripts": {
-    "dev": "svelte-kit dev",
+    "dev": "svelte-kit dev -p 8889",
     "build": "svelte-kit build",
     "preview": "svelte-kit preview",
     "test:file": "node",

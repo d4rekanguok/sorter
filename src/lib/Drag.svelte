@@ -103,11 +103,8 @@
         })
     }
 
-    const handleWindowScroll = () => {
-        store.update((store) => {
-            store.wd = ref.getBoundingClientRect()
-            return store
-        })
+    const recalculateWrapperDimension = () => {
+        $store.wd = ref.getBoundingClientRect()
     }
 
     const handleWrapperScroll = () => {
@@ -131,9 +128,15 @@
     $: handleWrapperAutoScroll($scrollPos)
 </script>
 
-<svelte:window on:mousemove={handleMove} on:scroll={handleWindowScroll} />
+<svelte:window
+    on:mousemove={handleMove}
+    on:scroll={recalculateWrapperDimension}
+/>
 
 {#if debug && $store.ready}
+    <button on:click={recalculateWrapperDimension} class="debug-recalc"
+        >Recalculate scroll pos</button
+    >
     <pre
         style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 dropIndex: {$dropIndex}
@@ -147,6 +150,7 @@ container dimension: {$store.wd.left} | {$store.wd.top}
     class="outer-wrapper {className}"
     bind:this={ref}
     on:scroll={handleWrapperScroll}
+    on:mouseenter={recalculateWrapperDimension}
 >
     <div
         class="inner-wrapper"
@@ -181,5 +185,11 @@ container dimension: {$store.wd.left} | {$store.wd.top}
     .outer-wrapper::-webkit-scrollbar-thumb {
         background-color: var(--sds-color-scrollbar, pink);
         border-radius: 100px;
+    }
+
+    .debug-recalc {
+        position: fixed;
+        top: 0;
+        right: 0;
     }
 </style>
