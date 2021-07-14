@@ -131,11 +131,12 @@
     main {
         position: relative;
         margin: 0 auto;
-        padding: 8rem 0;
+        padding: 50vh 0;
         max-width: 60rem;
     }
 
     .wrapper {
+        position: relative;
         overflow: scroll;
         height: 50vh;
         width: 200px;

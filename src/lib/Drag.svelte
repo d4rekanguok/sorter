@@ -69,7 +69,7 @@
             if (!ref) return store
 
             store.wd = ref.getBoundingClientRect()
-            store.originWd = ref.getBoundingClientRect()
+            store.originWd = store.wd
             store.itemDimension = itemDimension
             store.ready = true
 
@@ -79,9 +79,6 @@
 
     const handleMove = (e) => {
         const { clientX, clientY } = e
-        // const { left: offsetX, top: offsetY } = $store.wd
-        // const x = clientX - offsetX
-        // const y = clientY - offsetY
         $store.pos = [clientX, clientY]
     }
 

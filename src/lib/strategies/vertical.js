@@ -17,7 +17,7 @@ const unplace = ({
     const y = position[1] - containerDimension.top
     const h = dimension[1]
 
-    const start = Math.ceil(y / h)
+    const start = Math.max(Math.ceil(y / h), 0)
     const end = Math.min(
         length,
         Math.floor((y + containerDimension.height) / h)

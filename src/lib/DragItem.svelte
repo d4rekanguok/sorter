@@ -11,6 +11,9 @@
     let nextIndex = index
     let _abortDragPromise = null
     let _dragIdSize = 0
+    let isDragging = false
+    let posX = 0
+    let posY = 0
 
     const pos = spring(null, {
         stiffness: 0.1,
@@ -60,6 +63,16 @@
         }
     }
 
+    $: {
+        isDragging = $store.dragIds.has(index)
+        posX = isDragging
+            ? $pos[0] + ($store.wd?.left - ($store.originWd?.left || 0))
+            : $pos[0]
+        posY = isDragging
+            ? $pos[1] + ($store.wd?.top - ($store.originWd?.top || 0))
+            : $pos[1]
+    }
+
     /**
      * Calculate absolute position based on cursor pos
      * @param {[number, number]} pos
@@ -106,14 +119,6 @@
         document.removeEventListener('mouseup', handleMouseUp, true)
         dragEnd()
     }
-
-    $: isDragging = $store.dragIds.has(index)
-    $: posX = isDragging
-        ? $pos[0] + ($store.wd?.left - ($store.originWd?.left || 0))
-        : $pos[0]
-    $: posY = isDragging
-        ? $pos[1] + ($store.wd?.top - ($store.originWd?.top || 0))
-        : $pos[1]
 </script>
 
 {#if $store.ready}
