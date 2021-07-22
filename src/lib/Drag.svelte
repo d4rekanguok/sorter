@@ -88,20 +88,16 @@
         return rect
     }
 
-    const handleScroll = (e) => {
-        const rect = recalculateWrapperDimension()
-        if (e.target !== document && e.target.contains(ref)) {
-            const visibleRect = getVisibleRect(ref, rect)
-            const { wd, itemDimension } = $store
-            $store.visibleIdRange = checkVisibility({
-                wd,
-                itemDimension,
-                visibleRect,
-            })
-
-            console.log($store.visibleIdRange)
-            visualize(visibleRect)
-        }
+    const handleScroll = () => {
+        const rect = ref.getBoundingClientRect()
+        const visibleRect = getVisibleRect(ref, rect)
+        const { itemDimension } = $store
+        $store.wd = rect
+        $store.visibleIdRange = checkVisibility({
+            wd: rect,
+            itemDimension,
+            visibleRect,
+        })
     }
 
     store.on('dragging', () => recalculateWrapperDimension())
