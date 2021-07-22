@@ -11,17 +11,20 @@ export const DragStates = {
 export const createStore = () => {
     /** @type {Drag.Store} */
     const initialStore = {
+        ready: false,
+        state: DragStates.idle,
+        
         wd: null,
         originWd: null,
         itemDimension: [0, 0],
-        ready: false,
-        state: DragStates.idle,
+        
         dragIds: new Set(),
         selectedIds: new Set(),
+        visibleIdRange: [0, Infinity],
+        
         pos: [0, 0],
         originPos: [0, 0],
     }
-
 
     const { subscribe, update, set } = writable(initialStore)
 
@@ -33,7 +36,7 @@ export const createStore = () => {
     }
 
     const runListeners = (store, eventName) => {
-        listeners.forEach(cb => {
+        listeners.forEach((cb) => {
             if (cb.__eventName === eventName) {
                 cb(store)
             }
@@ -66,7 +69,6 @@ export const createStore = () => {
 
                 store.originPos = originPos
                 store.state = DragStates.dragging
-
             }
             if (state === DragStates.idle) {
                 store.dragIds.clear()
@@ -126,7 +128,6 @@ export const createStore = () => {
             unsubStore()
             listeners = []
         }
-
     }
 
     return { subscribe: subscribeAll, update, transit, dragUntil, set, on }

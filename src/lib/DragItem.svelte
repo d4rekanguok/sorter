@@ -66,10 +66,10 @@
     $: {
         isDragging = $store.dragIds.has(index)
         posX = isDragging
-            ? $pos[0] + ($store.wd?.left - ($store.originWd?.left || 0))
+            ? $pos[0] + ($store.wd?.left - $store.originWd?.left)
             : $pos[0]
         posY = isDragging
-            ? $pos[1] + ($store.wd?.top - ($store.originWd?.top || 0))
+            ? $pos[1] + ($store.wd?.top - $store.originWd?.top)
             : $pos[1]
     }
 

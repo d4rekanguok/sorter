@@ -10,6 +10,7 @@
         reorder,
     } from '$lib'
     import TemplateClick from '$components/TemplateClick.svelte'
+    import DragVirtualizer from '$lib/DragVirtualizer.svelte'
 
     /**
      * @typedef Data
@@ -94,26 +95,26 @@
                 on:dragend={handleDragEnd}
             >
                 {#each data as item, index (item.id)}
-                    <DragItem
-                        {index}
-                        isSelected={selected.has(item.id)}
-                        let:isDragging
-                    >
-                        <TemplateClick
-                            {item}
+                    <DragVirtualizer {index}>
+                        <DragItem
                             {index}
-                            {isDragging}
                             isSelected={selected.has(item.id)}
-                            on:select={handleSelect}
-                            on:add={handleAdd}
-                        />
-                    </DragItem>
+                            let:isDragging
+                        >
+                            <TemplateClick
+                                {item}
+                                {index}
+                                {isDragging}
+                                isSelected={selected.has(item.id)}
+                                on:select={handleSelect}
+                                on:add={handleAdd}
+                            />
+                        </DragItem>
+                    </DragVirtualizer>
                 {/each}
                 <DragIndicator />
-                <DragItem index={data.length} draggable={false}>
-                    <button class="add" on:click={handleAdd}>More</button>
-                </DragItem>
             </Drag>
+            <button class="add" on:click={handleAdd}>More</button>
         </div>
     </div>
 </main>
@@ -138,7 +139,7 @@
     .wrapper {
         position: relative;
         overflow: scroll;
-        height: 50vh;
+        height: 75vh;
         width: 200px;
         border-radius: 8px;
         border: 1px solid skyblue;

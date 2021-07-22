@@ -43,16 +43,13 @@ const autoScroll = ({ axis, direction, scrollPos, depth }) => {
 }
 
 /** @type {Drag.Strategy['checkVisibility']} */
-const checkVisibility = ({ index, itemDimension, wd }) => {
+const checkVisibility = ({ itemDimension, wd, visibleRect }) => {
+    const startY = visibleRect.y - wd.y
+    const endY = startY + visibleRect.height
     const itemHeight = itemDimension[1]
-    const top = index * itemHeight
-    const bottom = (index + 1) * itemHeight
-    const margin = itemHeight * 2
-
-    const min = margin
-    const max = wd.height + margin
-
-    return (bottom >= min && bottom <= max) || (top <= max && top >= min)
+    const startId = Math.floor(startY / itemHeight)
+    const endId = Math.ceil(endY / itemHeight)
+    return [startId, endId]
 }
 
 export default createStrategy({

@@ -43,11 +43,9 @@ declare namespace Drag {
     }
 
     interface CheckVisibilityArgs {
-        index: number
         itemDimension: Dimension
         wd: DOMRect
-        scrollPos: Point
-        margin: number
+        visibleRect: DOMRect
     }
 
     export interface Strategy {
@@ -58,6 +56,6 @@ declare namespace Drag {
             args: GetContainerMaxDimensionArgs
         ) => Dimension
         autoScroll: (args: AutoScrollArgs) => void
-        checkVisibility?: (args: CheckVisibilityArgs) => boolean
+        checkVisibility?: (args: CheckVisibilityArgs) => [number, number]
     }
 }

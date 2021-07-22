@@ -2,6 +2,8 @@
     import { setContext, onMount, createEventDispatcher } from 'svelte'
     import { derived } from 'svelte/store'
     import { key, createStore, DragStates } from './context'
+    import { visualize } from './dom-visualize'
+    import { getVisibleRect } from './getVisibleRect'
     import { defaultStrategies } from './strategies'
 
     const dispatch = createEventDispatcher()
@@ -17,7 +19,7 @@
     const _strategy =
         typeof strategy === 'string' ? defaultStrategies[strategy] : strategy
 
-    const { unplace, getContainerMaxDimension } = _strategy
+    const { unplace, getContainerMaxDimension, checkVisibility } = _strategy
 
     /** @type {HTMLDivElement} */
     export let ref
@@ -65,19 +67,14 @@
     $: $store.itemDimension = itemDimension
 
     onMount(() => {
-        store.update((store) => {
-            if (!ref) return store
-
-            store.wd = ref.getBoundingClientRect()
-            store.originWd = {
-                top: store.wd.top + window.scrollY,
-                left: store.wd.left + window.scrollX,
-            }
-            store.itemDimension = itemDimension
-            store.ready = true
-
-            return store
-        })
+        const rect = ref.getBoundingClientRect()
+        $store.wd = rect
+        $store.originWd = {
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX,
+        }
+        $store.itemDimension = itemDimension
+        $store.ready = true
     })
 
     const handleMove = (e) => {
@@ -86,36 +83,31 @@
     }
 
     const recalculateWrapperDimension = () => {
-        $store.wd = ref.getBoundingClientRect()
+        const rect = ref.getBoundingClientRect()
+        $store.wd = rect
+        return rect
     }
 
-    // const handleWrapperScroll = () => {
-    //     if (!ref) return
-    //     const y = ref.scrollTop
-    //     const x = ref.scrollLeft
+    const handleScroll = (e) => {
+        const rect = recalculateWrapperDimension()
+        if (e.target !== document && e.target.contains(ref)) {
+            const visibleRect = getVisibleRect(ref, rect)
+            const { wd, itemDimension } = $store
+            $store.visibleIdRange = checkVisibility({
+                wd,
+                itemDimension,
+                visibleRect,
+            })
 
-    //     if ($store.dragIds.size == 0) {
-    //         scrollPos.stop()
-    //     }
-
-    //     scrollPos.set([x, y])
-    // }
-
-    // const handleWrapperAutoScroll = ([x, y]) => {
-    //     if (!ref) return
-    //     ref.scrollTop = y
-    //     ref.scrollLeft = x
-    // }
-
-    // $: handleWrapperAutoScroll($scrollPos)
+            console.log($store.visibleIdRange)
+            visualize(visibleRect)
+        }
+    }
 
     store.on('dragging', () => recalculateWrapperDimension())
 </script>
 
-<svelte:window
-    on:mousemove={handleMove}
-    on:scroll={recalculateWrapperDimension}
-/>
+<svelte:window on:mousemove={handleMove} on:scroll|capture={handleScroll} />
 
 {#if debug && $store.ready}
     <button on:click={recalculateWrapperDimension} class="debug-recalc"
@@ -133,7 +125,7 @@ container dimension: {$store.wd.left - $store.originWd.left} | {$store.wd.top - 
 
 <div
     bind:this={ref}
-    class="inner-wrapper"
+    class="inner-wrapper {className}"
     style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
 >
     <slot />
