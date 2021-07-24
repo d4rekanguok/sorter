@@ -77,22 +77,6 @@
         $store.selectedIds = selectedIndex
     }
 
-    $: visibleItems = data.reduce((acc, item, index) => {
-        if (
-            $store.ready &&
-            ($store.dragIds.has(index) ||
-                $store.selectedIds.has(index) ||
-                (index <= $store.visibleIdRange[1] + $store.selectedIds.size &&
-                    index >= $store.visibleIdRange[0]))
-        ) {
-            acc.push({
-                index,
-                item,
-            })
-        }
-        return acc
-    }, [])
-
     onMount(() => {
         const rect = ref.getBoundingClientRect()
         $store.wd = rect
@@ -103,6 +87,17 @@
         $store.itemDimension = itemDimension
         $store.ready = true
     })
+
+    const shouldRender = (index, store) => {
+        const { ready, dragIds, selectedIds, visibleIdRange } = store
+        return (
+            ready &&
+            (dragIds.has(index) ||
+                selectedIds.has(index) ||
+                (index <= visibleIdRange[1] + selectedIds.size &&
+                    index >= visibleIdRange[0]))
+        )
+    }
 
     const handleMove = (e) => {
         const { clientX, clientY } = e
@@ -139,10 +134,7 @@
     <pre
         style="position: fixed; bottom: 0.5rem; left: 0.5rem;">
 dropIndex: {$dropIndex}
-cursor: {$store.pos.join(" | ")}
-container dimension: {$store.wd.left} | {$store.wd.top}
-container dimension: {$store.originWd.left} | {$store.originWd.top}
-container dimension: {$store.wd.left - $store.originWd.left} | {$store.wd.top - $store.originWd.top}
+visiblerange: {$store.visibleIdRange.join(' -> ')}
     </pre>
 {/if}
 
@@ -151,10 +143,12 @@ container dimension: {$store.wd.left - $store.originWd.left} | {$store.wd.top - 
     class="inner-wrapper {className}"
     style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
 >
-    {#each visibleItems as { item, index } (item.id)}
-        <DragItem {index}>
-            <slot name="item" {item} {index} />
-        </DragItem>
+    {#each data as item, index (item.id)}
+        {#if shouldRender(index, $store)}
+            <DragItem {index}>
+                <slot name="item" {item} {index} />
+            </DragItem>
+        {/if}
     {/each}
     <slot name="indicator">
         <DragIndicator />

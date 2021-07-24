@@ -78,30 +78,28 @@
     <div class="wrapper">
         <h2>Horizontal</h2>
         <button on:click={handleChangeSize}>Change Size</button>
-        <div class="drag" style="--sds-color-scrollbar: tomato;">
-            <Drag
-                debug={true}
-                strategy="vertical"
-                {data}
-                {selected}
-                itemDimension={itemDimensions[itemDimensionId]}
-                on:dragend={handleDragEnd}
-                let:item
-                let:index
-                let:isDragging
-            >
-                <TemplateClick
-                    slot="item"
-                    {item}
-                    {index}
-                    {isDragging}
-                    isSelected={selected.has(index)}
-                    on:select={handleSelect}
-                    on:add={handleAdd}
-                />
-            </Drag>
-            <button class="add" on:click={handleAdd}>More</button>
-        </div>
+        <Drag
+            debug={true}
+            strategy="vertical"
+            {data}
+            {selected}
+            itemDimension={itemDimensions[itemDimensionId]}
+            on:dragend={handleDragEnd}
+            let:item
+            let:index
+            let:isDragging
+        >
+            <TemplateClick
+                slot="item"
+                {item}
+                {index}
+                {isDragging}
+                isSelected={selected.has(index)}
+                on:select={handleSelect}
+                on:add={handleAdd}
+            />
+        </Drag>
+        <button class="add" on:click={handleAdd}>More</button>
     </div>
 </main>
 
