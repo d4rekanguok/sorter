@@ -141,6 +141,7 @@
         /** do not set top/left to 0 */
         top: auto;
         left: auto;
+        contain: layout;
     }
 
     .dev {

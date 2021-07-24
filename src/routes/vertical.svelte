@@ -14,7 +14,7 @@
 
     /** @type {Data[]} */
     let data = Object.keys(colors)
-        .filter((_, i) => i < 40)
+        .filter((_, i) => i < 1000)
         .map((color) => ({
             id: nanoid(6),
             value: color,
@@ -136,9 +136,5 @@
         background-color: cornflowerblue;
         border: none;
         border-radius: 4px;
-    }
-
-    .drag {
-        width: 100%;
     }
 </style>
