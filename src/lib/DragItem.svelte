@@ -5,7 +5,6 @@
 
     export let index
     export let draggable = true
-    export let isSelected = false
 
     /** @type {number} temporary index while in drag state */
     let nextIndex = index
@@ -22,12 +21,6 @@
 
     const { store, dragEnd, strategy, debug } = getContext(key)
     const { place } = strategy
-
-    $: if (isSelected) {
-        $store.selectedIds.add(index)
-    } else {
-        $store.selectedIds.delete(index)
-    }
 
     $: {
         if ($store.state === DragStates.idle) {

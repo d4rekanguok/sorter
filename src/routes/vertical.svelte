@@ -2,15 +2,8 @@
     import colors from 'css-color-names'
     import { nanoid } from 'nanoid'
 
-    import {
-        Drag,
-        DragItem,
-        DragIndicator,
-        // DragVirtualizer,
-        reorder,
-    } from '$lib'
+    import { Drag, reorder } from '$lib'
     import TemplateClick from '$components/TemplateClick.svelte'
-    import DragVirtualizer from '$lib/DragVirtualizer.svelte'
 
     /**
      * @typedef Data
@@ -70,17 +63,17 @@
 </script>
 
 <main>
-    <!-- <div class="dev">
-      <pre
-          style="white-space: pre-wrap;">
+    <div class="dev">
+        <pre
+            style="white-space: pre-wrap;">
           {Array.from(selected).map(id => data.find(item => item.id === id).value).join(', ')}
       </pre>
 
-      <pre
+        <!-- <pre
           style="white-space: pre-wrap;">
           {data.map(v => v.value).join(', ')}
-      </pre>
-  </div> -->
+      </pre> -->
+    </div>
 
     <div class="wrapper">
         <h2>Horizontal</h2>
@@ -88,31 +81,24 @@
         <div class="drag" style="--sds-color-scrollbar: tomato;">
             <Drag
                 debug={true}
-                class="test-drag"
                 strategy="vertical"
-                size={data.length}
+                {data}
+                {selected}
                 itemDimension={itemDimensions[itemDimensionId]}
                 on:dragend={handleDragEnd}
+                let:item
+                let:index
+                let:isDragging
             >
-                {#each data as item, index (item.id)}
-                    <DragVirtualizer {index}>
-                        <DragItem
-                            {index}
-                            isSelected={selected.has(item.id)}
-                            let:isDragging
-                        >
-                            <TemplateClick
-                                {item}
-                                {index}
-                                {isDragging}
-                                isSelected={selected.has(item.id)}
-                                on:select={handleSelect}
-                                on:add={handleAdd}
-                            />
-                        </DragItem>
-                    </DragVirtualizer>
-                {/each}
-                <DragIndicator />
+                <TemplateClick
+                    slot="item"
+                    {item}
+                    {index}
+                    {isDragging}
+                    isSelected={selected.has(index)}
+                    on:select={handleSelect}
+                    on:add={handleAdd}
+                />
             </Drag>
             <button class="add" on:click={handleAdd}>More</button>
         </div>

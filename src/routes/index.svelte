@@ -2,13 +2,7 @@
     import colors from 'css-color-names'
     import { nanoid } from 'nanoid'
 
-    import {
-        Drag,
-        DragItem,
-        DragIndicator,
-        DragVirtualizer,
-        reorder,
-    } from '$lib'
+    import { Drag, DragItem, DragIndicator, reorder } from '$lib'
     import Template from '$components/Template.svelte'
 
     /**
@@ -125,22 +119,20 @@
             on:dragend={handleDragEnd}
         >
             {#each data as item, index (item.id)}
-                <DragVirtualizer {index}>
-                    <DragItem
+                <DragItem
+                    {index}
+                    isSelected={selected.has(item.id)}
+                    let:isDragging
+                >
+                    <Template
+                        {item}
                         {index}
+                        {isDragging}
                         isSelected={selected.has(item.id)}
-                        let:isDragging
-                    >
-                        <Template
-                            {item}
-                            {index}
-                            {isDragging}
-                            isSelected={selected.has(item.id)}
-                            on:select={handleSelect}
-                            on:add={handleAdd}
-                        />
-                    </DragItem>
-                </DragVirtualizer>
+                        on:select={handleSelect}
+                        on:add={handleAdd}
+                    />
+                </DragItem>
             {/each}
             <DragIndicator />
             <DragItem index={data.length} draggable={false}>

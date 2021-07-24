@@ -2,16 +2,19 @@
     import { setContext, onMount, createEventDispatcher } from 'svelte'
     import { derived } from 'svelte/store'
     import { key, createStore, DragStates } from './context'
-    import { visualize } from './dom-visualize'
     import { getVisibleRect } from './getVisibleRect'
     import { defaultStrategies } from './strategies'
+
+    import DragItem from './DragItem.svelte'
+    import DragIndicator from './DragIndicator.svelte'
 
     const dispatch = createEventDispatcher()
 
     /** @type {Drag.Dimension} [width, height] */
     export let itemDimension = [0, 0]
     export let debug = false
-    export let size = 0
+    export let data = []
+    export let selected = []
     let className = ''
     export { className as class }
     export let strategy = 'vertical'
@@ -31,7 +34,7 @@
                   position: _store.pos,
                   dimension: _store.itemDimension,
                   containerDimension: _store.wd,
-                  length: size,
+                  length: data.length,
               })
             : null
     })
@@ -50,7 +53,7 @@
     let maxDimension
     $: {
         maxDimension = getContainerMaxDimension({
-            size,
+            size: data.length,
             templateDimension: itemDimension,
         })
         // scrollPos.setScrollBound([0, 0, maxDimension[0], maxDimension[1]])
@@ -65,6 +68,30 @@
     })
 
     $: $store.itemDimension = itemDimension
+    $: {
+        let selectedIndex = new Set()
+        selected.forEach((itemId) => {
+            const index = data.findIndex((item) => item.id === itemId)
+            selectedIndex.add(index)
+        })
+        $store.selectedIds = selectedIndex
+    }
+
+    $: visibleItems = data.reduce((acc, item, index) => {
+        if (
+            $store.ready &&
+            ($store.dragIds.has(index) ||
+                $store.selectedIds.has(index) ||
+                (index <= $store.visibleIdRange[1] + $store.selectedIds.size &&
+                    index >= $store.visibleIdRange[0]))
+        ) {
+            acc.push({
+                index,
+                item,
+            })
+        }
+        return acc
+    }, [])
 
     onMount(() => {
         const rect = ref.getBoundingClientRect()
@@ -124,7 +151,14 @@ container dimension: {$store.wd.left - $store.originWd.left} | {$store.wd.top - 
     class="inner-wrapper {className}"
     style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
 >
-    <slot />
+    {#each visibleItems as { item, index } (item.id)}
+        <DragItem {index}>
+            <slot name="item" {item} {index} />
+        </DragItem>
+    {/each}
+    <slot name="indicator">
+        <DragIndicator />
+    </slot>
 </div>
 
 <style>
