@@ -14,6 +14,9 @@
     let posX = 0
     let posY = 0
 
+    /** @type {HTMLElement} */
+    let ref
+
     const pos = spring(null, {
         stiffness: 0.1,
         damping: 0.4,
@@ -94,11 +97,13 @@
 
     const handleMouseDown = async (e) => {
         if (!draggable || e.button === 2) return
-
         try {
             const { abort, promise } = store.dragUntil(10)
             _abortDragPromise = abort
             document.addEventListener('mouseup', handleMouseUpAbort, true)
+            ref.addEventListener('mouseup', handleElementMouseUp, true)
+            ref.addEventListener('click', handleElementMouseUp, true)
+
             await promise
 
             const { clientX, clientY } = e
@@ -107,27 +112,42 @@
                 originPos: [clientX, clientY],
             })
 
+            document.removeEventListener('mouseup', handleMouseUpAbort, true)
             document.addEventListener('mouseup', handleMouseUp, true)
         } catch (e) {
             return
         }
     }
 
-    const handleMouseUpAbort = (e) => {
-        e.stopPropagation()
-        if (_abortDragPromise) _abortDragPromise()
-        document.removeEventListener('mouseup', handleMouseUpAbort, true)
+    const handleMouseUpAbort = () => {
+        if (_abortDragPromise) {
+            _abortDragPromise()
+            document.removeEventListener('mouseup', handleMouseUpAbort, true)
+            ref.removeEventListener('mouseup', handleElementMouseUp, true)
+            ref.removeEventListener('click', handleElementMouseUp, true)
+        }
     }
 
-    const handleMouseUp = (e) => {
-        e.stopPropagation()
+    const handleMouseUp = () => {
         document.removeEventListener('mouseup', handleMouseUp, true)
         dragEnd()
+
+        /** schedule the removal of the event to the end of the task queue to prevent ghost click on the elemnt */
+        setTimeout(() => {
+            ref.removeEventListener('mouseup', handleElementMouseUp, true)
+            ref.removeEventListener('click', handleElementMouseUp, true)
+        }, 0)
+    }
+
+    const handleElementMouseUp = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
     }
 </script>
 
 {#if $store.ready}
     <div
+        bind:this={ref}
         on:mousedown|preventDefault|stopPropagation|capture={handleMouseDown}
         on:dragstart|preventDefault|stopPropagation={() => null}
         on:drop|preventDefault={() => null}
@@ -141,9 +161,9 @@
   transform: translate(${posX}px, ${posY}px);
 `}
     >
-        {#if debug}
+        <!-- {#if debug}
             <div class="dev">{$pos.join(' | ')}</div>
-        {/if}
+        {/if} -->
         <slot isDragging={$store.dragIds.has(index)} />
     </div>
 {/if}
