@@ -22,7 +22,7 @@
         damping: 0.4,
     })
 
-    const { store, dragEnd, strategy, debug } = getContext(key)
+    const { store, dragEnd, strategy } = getContext(key)
     const { place } = strategy
 
     $: {
@@ -101,6 +101,8 @@
             const { abort, promise } = store.dragUntil(10)
             _abortDragPromise = abort
             document.addEventListener('mouseup', handleMouseUpAbort, true)
+
+            /* prevent ghost clicks after drag release */
             ref.addEventListener('mouseup', handleElementMouseUp, true)
             ref.addEventListener('click', handleElementMouseUp, true)
 
@@ -161,9 +163,6 @@
   transform: translate(${posX}px, ${posY}px);
 `}
     >
-        <!-- {#if debug}
-            <div class="dev">{$pos.join(' | ')}</div>
-        {/if} -->
         <slot />
     </div>
 {/if}
@@ -174,12 +173,5 @@
         top: auto;
         left: auto;
         contain: layout;
-    }
-
-    .dev {
-        position: absolute;
-        z-index: 100;
-        right: 1rem;
-        font-size: 0.8rem;
     }
 </style>

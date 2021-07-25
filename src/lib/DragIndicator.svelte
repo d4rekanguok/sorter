@@ -6,7 +6,6 @@
     const { name = '', place } = strategy
     $: pos = place({ index: $dropIndex, dimension: $store.itemDimension })
     $: opacity = $store.state === 'dragging' ? 1 : 0
-
 </script>
 
 <div
@@ -18,9 +17,7 @@
     opacity: ${opacity};
 `}
 >
-    <slot>
-        <div class="default-indicator {name}" />
-    </slot>
+    <div class="default-indicator {name}" />
 </div>
 
 <style>
@@ -43,5 +40,4 @@
         width: 100%;
         height: 2px;
     }
-
 </style>
