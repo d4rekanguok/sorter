@@ -146,7 +146,12 @@ visiblerange: {$store.visibleIdRange.join(' -> ')}
     {#each data as item, index (item.id)}
         {#if shouldRender(index, $store)}
             <DragItem {index}>
-                <slot name="item" {item} {index} />
+                <slot
+                    name="item"
+                    {item}
+                    {index}
+                    isDragging={$store.dragIds.has(index)}
+                />
             </DragItem>
         {/if}
     {/each}

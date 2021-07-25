@@ -164,7 +164,7 @@
         <!-- {#if debug}
             <div class="dev">{$pos.join(' | ')}</div>
         {/if} -->
-        <slot isDragging={$store.dragIds.has(index)} />
+        <slot />
     </div>
 {/if}
 
