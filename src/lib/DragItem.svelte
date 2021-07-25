@@ -5,26 +5,26 @@
 
     export let index
     export let draggable = true
-    export let isSelected = false
 
     /** @type {number} temporary index while in drag state */
     let nextIndex = index
     let _abortDragPromise = null
     let _dragIdSize = 0
+    let isDragging = false
+    let isMainDragger = false
+    let posX = 0
+    let posY = 0
+
+    /** @type {HTMLElement} */
+    let ref
 
     const pos = spring(null, {
         stiffness: 0.1,
         damping: 0.4,
     })
 
-    const { store, dragEnd, strategy, debug, scrollPos } = getContext(key)
+    const { store, dragEnd, strategy } = getContext(key)
     const { place } = strategy
-
-    $: if (isSelected) {
-        $store.selectedIds.add(index)
-    } else {
-        $store.selectedIds.delete(index)
-    }
 
     $: {
         if ($store.state === DragStates.idle) {
@@ -32,20 +32,27 @@
             nextIndex = index
         }
 
+        const nextPos = place({
+            index: nextIndex,
+            dimension: $store.itemDimension,
+        })
+
         if ($store.dragIds.has(index)) {
             const i = Array.from($store.dragIds)
                 .sort((a, b) => a - b)
                 .indexOf(index)
 
-            pos.set(
-                getPos(
+            if (isMainDragger) {
+                $store.draggingPos = getPos(
+                    nextPos,
                     $store.pos,
-                    $store.offsetPos,
-                    [window.scrollX, window.scrollY],
-                    $scrollPos,
-                    i
+                    $store.originPos,
+                    $store.tempScrollOffset
                 )
-            )
+            }
+            if ($store.draggingPos) {
+                pos.set($store.draggingPos.map((v) => v + i * 10))
+            }
         } else {
             const { dragIds } = $store
             if (dragIds.size !== _dragIdSize) {
@@ -59,10 +66,23 @@
                 _dragIdSize = dragIds.size
             }
 
-            pos.set(
-                place({ index: nextIndex, dimension: $store.itemDimension })
-            )
+            pos.set(nextPos)
         }
+    }
+
+    $: {
+        const { dragIds, wd, originWd } = $store
+        isDragging = dragIds.has(index)
+        let dx = 0
+        let dy = 0
+
+        if (wd && originWd) {
+            dx = wd.left - originWd.left
+            dy = wd.top - originWd.top
+        }
+
+        posX = isDragging ? $pos[0] + dx : $pos[0]
+        posY = isDragging ? $pos[1] + dy : $pos[1]
     }
 
     /**
@@ -70,66 +90,72 @@
      * @param {[number, number]} pos
      * @param {[number, number]} offsetPos
      * @param {[number, number]} globalScrollPos scrollX, scrollY
-     * @param {[number, number]} localScrollPos
-     * @param {number} i
+     * @param {[number, number]} tempScrollOffset
      * @returns {[number, number]}
      */
-    const getPos = (pos, offsetPos, globalScrollPos, localScrollPos, i = 0) => {
-        const x =
-            pos[0] -
-            offsetPos[0] -
-            globalScrollPos[0] +
-            localScrollPos[0] -
-            i * 10
-        const y =
-            pos[1] -
-            offsetPos[1] -
-            globalScrollPos[1] +
-            localScrollPos[1] -
-            i * 10
+    const getPos = (nextPos, pos, originPos, tempScrollOffset) => {
+        const x = nextPos[0] + (pos[0] - originPos[0]) + tempScrollOffset[0]
+        const y = nextPos[1] + (pos[1] - originPos[1]) + tempScrollOffset[1]
         return [x, y]
     }
 
     const handleMouseDown = async (e) => {
         if (!draggable || e.button === 2) return
-
         try {
             const { abort, promise } = store.dragUntil(10)
             _abortDragPromise = abort
             document.addEventListener('mouseup', handleMouseUpAbort, true)
+
+            /* prevent ghost clicks after drag release */
+            ref.addEventListener('mouseup', handleElementMouseUp, true)
+            ref.addEventListener('click', handleElementMouseUp, true)
+
             await promise
 
-            const { offsetX, offsetY } = e
+            const { clientX, clientY } = e
             store.transit(DragStates.dragging, {
                 dragId: index,
-                offsetPos: [offsetX, offsetY],
+                originPos: [clientX, clientY],
             })
 
+            isMainDragger = true
+            document.removeEventListener('mouseup', handleMouseUpAbort, true)
             document.addEventListener('mouseup', handleMouseUp, true)
         } catch (e) {
             return
         }
     }
 
-    const handleMouseUpAbort = (e) => {
-        e.stopPropagation()
-        if (_abortDragPromise) _abortDragPromise()
-        document.removeEventListener('mouseup', handleMouseUpAbort, true)
+    const handleMouseUpAbort = () => {
+        if (_abortDragPromise) {
+            _abortDragPromise()
+            document.removeEventListener('mouseup', handleMouseUpAbort, true)
+            ref.removeEventListener('mouseup', handleElementMouseUp, true)
+            ref.removeEventListener('click', handleElementMouseUp, true)
+        }
     }
 
-    const handleMouseUp = (e) => {
-        e.stopPropagation()
+    const handleMouseUp = () => {
         document.removeEventListener('mouseup', handleMouseUp, true)
         dragEnd()
+        isMainDragger = false
+
+        /** schedule the removal of the event to the end of the task queue to prevent ghost click on the elemnt */
+        setTimeout(() => {
+            ref.removeEventListener('mouseup', handleElementMouseUp, true)
+            ref.removeEventListener('click', handleElementMouseUp, true)
+        }, 0)
     }
 
-    $: isDragging = $store.dragIds.has(index)
-    $: posX = isDragging ? $pos[0] - $scrollPos[0] : $pos[0]
-    $: posY = isDragging ? $pos[1] - $scrollPos[1] : $pos[1]
+    const handleElementMouseUp = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+    }
 </script>
 
 {#if $store.ready}
     <div
+        bind:this={ref}
         on:mousedown|preventDefault|stopPropagation|capture={handleMouseDown}
         on:dragstart|preventDefault|stopPropagation={() => null}
         on:drop|preventDefault={() => null}
@@ -143,10 +169,7 @@
   transform: translate(${posX}px, ${posY}px);
 `}
     >
-        {#if debug}
-            <div class="dev">{$pos.join(' | ')}</div>
-        {/if}
-        <slot isDragging={$store.dragIds.has(index)} />
+        <slot />
     </div>
 {/if}
 
@@ -155,12 +178,6 @@
         /** do not set top/left to 0 */
         top: auto;
         left: auto;
-    }
-
-    .dev {
-        position: absolute;
-        z-index: 100;
-        right: 1rem;
-        font-size: 0.8rem;
+        contain: layout;
     }
 </style>

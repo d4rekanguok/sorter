@@ -2,13 +2,7 @@
     import colors from 'css-color-names'
     import { nanoid } from 'nanoid'
 
-    import {
-        Drag,
-        DragItem,
-        DragIndicator,
-        DragVirtualizer,
-        reorder,
-    } from '$lib'
+    import { Drag, reorder } from '$lib'
     import Template from '$components/Template.svelte'
 
     /**
@@ -28,6 +22,7 @@
 
     /** @type {Set<string>} */
     let selected = new Set()
+    let scrollWrapperRef
 
     const handleSelect = ({ detail }) => {
         const { id, isSelected } = detail
@@ -80,73 +75,32 @@
             {data.map(v => v.value).join(', ')}
         </pre>
     </div> -->
-
-    <!-- <div class="drag">
-        <Drag
-            size={data.length}
-            itemDimension={[180, 110]}
-            on:dragend={handleDragEnd}
-        >
-            {#each data as item, index (item.id)}
-                <DragVirtualizer {index}>
-                    <DragItem
-                        {index}
-                        isSelected={selected.has(item.id)}
-                        let:isDragging
-                    >
-                        <Template
-                            {item}
-                            {index}
-                            {isDragging}
-                            enableAdd={true}
-                            isSelected={selected.has(item.id)}
-                            on:select={handleSelect}
-                            on:add={handleAdd}
-                        />
-                    </DragItem>
-                </DragVirtualizer>
-            {/each}
-            <DragIndicator />
-            <DragItem index={data.length} draggable={false}>
-                <button class="add" on:click={handleAdd}>More</button>
-            </DragItem>
-        </Drag>
-    </div> -->
-
     <h2>Horizontal</h2>
     <button on:click={handleChangeSize}>Change Size</button>
-    <div class="drag" style="--sds-color-scrollbar: tomato;">
+    <div class="wrapper" bind:this={scrollWrapperRef}>
         <Drag
             debug={true}
-            class="test-drag"
             strategy="horizontal"
-            size={data.length}
+            {scrollWrapperRef}
+            {data}
+            {selected}
             itemDimension={itemDimensions[itemDimensionId]}
             on:dragend={handleDragEnd}
+            let:item
+            let:index
+            let:isDragging
         >
-            {#each data as item, index (item.id)}
-                <DragVirtualizer {index}>
-                    <DragItem
-                        {index}
-                        isSelected={selected.has(item.id)}
-                        let:isDragging
-                    >
-                        <Template
-                            {item}
-                            {index}
-                            {isDragging}
-                            isSelected={selected.has(item.id)}
-                            on:select={handleSelect}
-                            on:add={handleAdd}
-                        />
-                    </DragItem>
-                </DragVirtualizer>
-            {/each}
-            <DragIndicator />
-            <DragItem index={data.length} draggable={false}>
-                <button class="add" on:click={handleAdd}>More</button>
-            </DragItem>
+            <Template
+                slot="item"
+                {item}
+                {index}
+                {isDragging}
+                isSelected={selected.has(item.id)}
+                on:select={handleSelect}
+                on:add={handleAdd}
+            />
         </Drag>
+        <button class="add" on:click={handleAdd}>More</button>
     </div>
 </main>
 
@@ -168,7 +122,7 @@
     }
 
     .add {
-        width: 100%;
+        width: 100px;
         height: 28px;
         color: white;
         background-color: cornflowerblue;
@@ -176,9 +130,12 @@
         border-radius: 4px;
     }
 
-    .drag {
+    .wrapper {
+        position: relative;
+        overflow: scroll;
+        height: 200px;
         width: 100%;
-        height: 600px;
-        margin-bottom: 10rem;
+        border-radius: 8px;
+        border: 1px solid skyblue;
     }
 </style>

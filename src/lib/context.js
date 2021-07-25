@@ -11,17 +11,38 @@ export const DragStates = {
 export const createStore = () => {
     /** @type {Drag.Store} */
     const initialStore = {
-        wd: null,
-        itemDimension: [0, 0],
         ready: false,
         state: DragStates.idle,
+        
+        wd: null,
+        originWd: null,
+        itemDimension: [0, 0],
+        
         dragIds: new Set(),
         selectedIds: new Set(),
+        visibleIdRange: [0, Infinity],
+        
         pos: [0, 0],
-        offsetPos: [0, 0],
+        originPos: [0, 0],
+        tempScrollOffset: [0, 0],
     }
 
     const { subscribe, update, set } = writable(initialStore)
+
+    let listeners = []
+
+    const on = (eventName, callback) => {
+        callback.__eventName = eventName
+        listeners.push(callback)
+    }
+
+    const runListeners = (store, eventName) => {
+        listeners.forEach((cb) => {
+            if (cb.__eventName === eventName) {
+                cb(store)
+            }
+        })
+    }
 
     /**
      * Transition into a new state
@@ -37,7 +58,7 @@ export const createStore = () => {
             }
 
             if (state === DragStates.dragging) {
-                const { dragId, offsetPos } = args
+                const { dragId, originPos } = args
                 const { dragIds, selectedIds } = store
                 if (selectedIds.has(dragId)) {
                     selectedIds.forEach((v) => {
@@ -47,16 +68,20 @@ export const createStore = () => {
                     dragIds.add(dragId)
                 }
 
-                store.offsetPos = offsetPos
+                store.originPos = originPos
                 store.state = DragStates.dragging
             }
             if (state === DragStates.idle) {
                 store.dragIds.clear()
+                
                 store.pos = [0, 0]
-                store.offsetPos = [0, 0]
+                store.originPos = [0, 0]
+                store.tempScrollOffset = [0, 0]
+
                 store.state = DragStates.idle
             }
 
+            runListeners(store, state)
             return store
         })
 
@@ -101,5 +126,13 @@ export const createStore = () => {
         }
     }
 
-    return { subscribe, update, transit, dragUntil, set }
+    const subscribeAll = (...args) => {
+        const unsubStore = subscribe(...args)
+        return () => {
+            unsubStore()
+            listeners = []
+        }
+    }
+
+    return { subscribe: subscribeAll, update, transit, dragUntil, set, on }
 }
