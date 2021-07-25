@@ -19,8 +19,10 @@ export const scroll = (el, axis, delta, store) => {
 
   const move = () => {
     const attr = _axis === 'y' ? 'scrollTop' : 'scrollLeft'
+    const offsetAxis = _axis === 'y' ? 1 : 0
+
     el[attr] += _delta
-    store.tempScrollOffset[1] += delta
+    store.tempScrollOffset[offsetAxis] += delta
     req = requestAnimationFrame(move)
   }
 

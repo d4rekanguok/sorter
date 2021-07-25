@@ -12,17 +12,15 @@ const unplace = ({
     position,
     dimension,
     containerDimension,
-    scrollPosition,
     length,
 }) => {
-    const x = position[0] + scrollPosition[0]
+    const x = position[0] - containerDimension.left
     const w = dimension[0]
-    const offsetX = scrollPosition[0]
 
-    const start = Math.ceil(offsetX / w)
+    const start = Math.max(Math.ceil(x / w), 0)
     const end = Math.min(
         length,
-        Math.floor((offsetX + containerDimension.width) / w)
+        Math.floor((x + containerDimension.width) / w)
     )
 
     const i = Math.round(x / w)
@@ -35,27 +33,38 @@ const getContainerMaxDimension = ({ size, templateDimension }) => {
     return [w * size, h]
 }
 
-/** @type {Drag.Strategy['autoScroll']} */
-const autoScroll = ({ axis, direction, scrollPos, depth }) => {
-    if (axis === 'x' && direction !== 0) {
-        scrollPos.start({ direction, axis, depth, delta: 6 })
-    } else {
-        scrollPos.stop()
+const getAutoScrollZone = ({ pos, visibleRect, isOverlapped }) => {
+    const { top, left, right, width, height } = visibleRect
+    const zoneWidth = width * 0.2
+    const upperZoneRect = new DOMRect(left, top, zoneWidth, height)
+    const lowerZoneRect = new DOMRect(
+        right - zoneWidth,
+        top,
+        zoneWidth,
+        height
+    )
+
+    let direction = 0
+    if (isOverlapped(pos, upperZoneRect)) {
+        direction = -1
     }
+
+    if (isOverlapped(pos, lowerZoneRect)) {
+        direction = 1
+    }
+
+    return { axis: 'x', delta: direction * 4 }
 }
 
 /** @type {Drag.Strategy['checkVisibility']} */
-const checkVisibility = ({ index, itemDimension, wd, scrollPos }) => {
+const checkVisibility = ({ itemDimension, wd, visibleRect }) => {
+    const margin = 2
+    const startX = visibleRect.x - wd.x
+    const endX = startX + visibleRect.width
     const itemWidth = itemDimension[0]
-    const scrollPosX = scrollPos[0]
-    const begin = index * itemWidth
-    const end = (index + 1) * itemWidth
-    const margin = itemDimension[0] * 2
-
-    const min = scrollPosX - margin
-    const max = scrollPosX + wd.width + margin
-
-    return (end >= min && end <= max) || (begin <= max && begin >= min)
+    const startId = Math.floor(startX / itemWidth) - margin
+    const endId = Math.ceil(endX / itemWidth) + margin
+    return [startId, endId]
 }
 
 export default createStrategy({
@@ -63,6 +72,6 @@ export default createStrategy({
     place,
     unplace,
     getContainerMaxDimension,
-    autoScroll,
+    getAutoScrollZone,
     checkVisibility,
 })
