@@ -11,6 +11,7 @@
     let _abortDragPromise = null
     let _dragIdSize = 0
     let isDragging = false
+    let isMainDragger = false
     let posX = 0
     let posY = 0
 
@@ -41,7 +42,7 @@
                 .sort((a, b) => a - b)
                 .indexOf(index)
 
-            if (i === 0) {
+            if (isMainDragger) {
                 $store.draggingPos = getPos(
                     nextPos,
                     $store.pos,
@@ -117,6 +118,7 @@
                 originPos: [clientX, clientY],
             })
 
+            isMainDragger = true
             document.removeEventListener('mouseup', handleMouseUpAbort, true)
             document.addEventListener('mouseup', handleMouseUp, true)
         } catch (e) {
@@ -136,6 +138,7 @@
     const handleMouseUp = () => {
         document.removeEventListener('mouseup', handleMouseUp, true)
         dragEnd()
+        isMainDragger = false
 
         /** schedule the removal of the event to the end of the task queue to prevent ghost click on the elemnt */
         setTimeout(() => {
