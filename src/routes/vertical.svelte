@@ -23,6 +23,9 @@
     /** @type {Set<string>} */
     let selected = new Set()
 
+    /** @type {HTMLElement} */
+    let scrollWrapperRef
+
     const handleSelect = ({ detail }) => {
         const { id, isSelected } = detail
         if (isSelected) {
@@ -75,12 +78,13 @@
       </pre> -->
     </div>
 
-    <div class="wrapper">
+    <div class="wrapper" bind:this={scrollWrapperRef}>
         <h2>Horizontal</h2>
         <button on:click={handleChangeSize}>Change Size</button>
         <Drag
             debug={true}
             strategy="vertical"
+            {scrollWrapperRef}
             {data}
             {selected}
             itemDimension={itemDimensions[itemDimensionId]}

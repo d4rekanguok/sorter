@@ -33,13 +33,27 @@ const getContainerMaxDimension = ({ size, templateDimension }) => {
     return [w, h * size]
 }
 
-/** @type {Drag.Strategy['autoScroll']} */
-const autoScroll = ({ axis, direction, scrollPos, depth }) => {
-    if (axis === 'y' && direction !== 0) {
-        scrollPos.start({ direction, axis, depth, delta: 6 })
-    } else {
-        scrollPos.stop()
+const getAutoScrollZone = ({ pos, visibleRect, isOverlapped }) => {
+    const { top, left, bottom, width, height } = visibleRect
+    const zoneHeight = height * 0.2
+    const upperZoneRect = new DOMRect(left, top, width, zoneHeight)
+    const lowerZoneRect = new DOMRect(
+        left,
+        bottom - zoneHeight,
+        width,
+        zoneHeight
+    )
+
+    let direction = 0
+    if (isOverlapped(pos, upperZoneRect)) {
+        direction = -1
     }
+
+    if (isOverlapped(pos, lowerZoneRect)) {
+        direction = 1
+    }
+
+    return { axis: 'y', delta: direction * 4 }
 }
 
 /** @type {Drag.Strategy['checkVisibility']} */
@@ -58,6 +72,6 @@ export default createStrategy({
     place,
     unplace,
     getContainerMaxDimension,
-    autoScroll,
+    getAutoScrollZone,
     checkVisibility,
 })

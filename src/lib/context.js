@@ -24,6 +24,7 @@ export const createStore = () => {
         
         pos: [0, 0],
         originPos: [0, 0],
+        tempScrollOffset: [0, 0],
     }
 
     const { subscribe, update, set } = writable(initialStore)
@@ -72,8 +73,11 @@ export const createStore = () => {
             }
             if (state === DragStates.idle) {
                 store.dragIds.clear()
+                
                 store.pos = [0, 0]
                 store.originPos = [0, 0]
+                store.tempScrollOffset = [0, 0]
+
                 store.state = DragStates.idle
             }
 

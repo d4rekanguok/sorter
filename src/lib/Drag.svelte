@@ -4,6 +4,8 @@
     import { key, createStore, DragStates } from './context'
     import { getVisibleRect } from './getVisibleRect'
     import { defaultStrategies } from './strategies'
+    import { isOverlapped } from './intersect'
+    import { scroll } from './autoScroll'
 
     import DragItem from './DragItem.svelte'
     import DragIndicator from './DragIndicator.svelte'
@@ -22,10 +24,18 @@
     const _strategy =
         typeof strategy === 'string' ? defaultStrategies[strategy] : strategy
 
-    const { unplace, getContainerMaxDimension, checkVisibility } = _strategy
+    const {
+        unplace,
+        getContainerMaxDimension,
+        checkVisibility,
+        getAutoScrollZone,
+    } = _strategy
 
     /** @type {HTMLDivElement} */
     export let ref
+
+    /** @type {HTMLDivElement} Scroll wrapper */
+    export let scrollWrapperRef
 
     const store = createStore()
     const dropIndex = derived(store, (_store) => {
@@ -68,6 +78,7 @@
     })
 
     $: $store.itemDimension = itemDimension
+
     $: {
         let selectedIndex = new Set()
         selected.forEach((itemId) => {
@@ -77,12 +88,13 @@
         $store.selectedIds = selectedIndex
     }
 
+    $: detectAutoScroll($store)
+
     onMount(() => {
-        const rect = ref.getBoundingClientRect()
-        $store.wd = rect
+        recalculateDimensions()
         $store.originWd = {
-            top: rect.top + window.scrollY,
-            left: rect.left + window.scrollX,
+            top: $store.wd.top + window.scrollY,
+            left: $store.wd.left + window.scrollX,
         }
         $store.itemDimension = itemDimension
         $store.ready = true
@@ -104,17 +116,12 @@
         $store.pos = [clientX, clientY]
     }
 
-    const recalculateWrapperDimension = () => {
-        const rect = ref.getBoundingClientRect()
-        $store.wd = rect
-        return rect
-    }
-
-    const handleScroll = () => {
+    const recalculateDimensions = () => {
         const rect = ref.getBoundingClientRect()
         const visibleRect = getVisibleRect(ref, rect)
         const { itemDimension } = $store
         $store.wd = rect
+        $store.visibleRect = visibleRect
         $store.visibleIdRange = checkVisibility({
             wd: rect,
             itemDimension,
@@ -122,13 +129,36 @@
         })
     }
 
-    store.on('dragging', () => recalculateWrapperDimension())
+    const detectAutoScroll = (store) => {
+        const { pos, visibleRect } = store
+        if (
+            !visibleRect ||
+            store.state !== DragStates.dragging ||
+            !getAutoScrollZone
+        ) {
+            return
+        }
+        const { axis, delta } = getAutoScrollZone({
+            pos,
+            visibleRect,
+            isOverlapped,
+        })
+
+        if (delta !== 0 && scrollWrapperRef) {
+            scroll(scrollWrapperRef, axis, delta, store)
+        }
+    }
+
+    store.on('dragging', () => recalculateDimensions())
 </script>
 
-<svelte:window on:mousemove={handleMove} on:scroll|capture={handleScroll} />
+<svelte:window
+    on:mousemove={handleMove}
+    on:scroll|capture={recalculateDimensions}
+/>
 
 {#if debug && $store.ready}
-    <button on:click={recalculateWrapperDimension} class="debug-recalc"
+    <button on:click={recalculateDimensions} class="debug-recalc"
         >Recalculate scroll pos</button
     >
     <pre
