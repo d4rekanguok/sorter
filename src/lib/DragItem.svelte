@@ -38,7 +38,16 @@
                 .sort((a, b) => a - b)
                 .indexOf(index)
 
-            pos.set(getPos(nextPos, $store.pos, $store.originPos, i))
+            if (i === 0) {
+                $store.draggingPos = getPos(
+                    nextPos,
+                    $store.pos,
+                    $store.originPos
+                )
+            }
+            if ($store.draggingPos) {
+                pos.set($store.draggingPos.map((v) => v + i * 10))
+            }
         } else {
             const { dragIds } = $store
             if (dragIds.size !== _dragIdSize) {
@@ -58,12 +67,16 @@
 
     $: {
         isDragging = $store.dragIds.has(index)
-        posX = isDragging
-            ? $pos[0] + ($store.wd?.left - $store.originWd?.left)
-            : $pos[0]
-        posY = isDragging
-            ? $pos[1] + ($store.wd?.top - $store.originWd?.top)
-            : $pos[1]
+        let dx = 0
+        let dy = 0
+
+        if ($store.wd && $store.originWd) {
+            dx = $store.wd.left - $store.originWd.left
+            dy = $store.wd.top - $store.originWd.top
+        }
+
+        posX = isDragging ? $pos[0] + dx : $pos[0]
+        posY = isDragging ? $pos[1] + dy : $pos[1]
     }
 
     /**
@@ -71,12 +84,11 @@
      * @param {[number, number]} pos
      * @param {[number, number]} offsetPos
      * @param {[number, number]} globalScrollPos scrollX, scrollY
-     * @param {number} i
      * @returns {[number, number]}
      */
-    const getPos = (nextPos, pos, originPos, i = 0) => {
-        const x = nextPos[0] + (pos[0] - originPos[0]) + i * 10
-        const y = nextPos[1] + (pos[1] - originPos[1]) + i * 10
+    const getPos = (nextPos, pos, originPos) => {
+        const x = nextPos[0] + (pos[0] - originPos[0])
+        const y = nextPos[1] + (pos[1] - originPos[1])
         return [x, y]
     }
 
