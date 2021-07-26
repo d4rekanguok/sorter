@@ -139,11 +139,12 @@
         document.removeEventListener('mouseup', handleMouseUp, true)
         dragEnd()
         isMainDragger = false
+        let el = ref
 
         /** schedule the removal of the event to the end of the task queue to prevent ghost click on the elemnt */
         setTimeout(() => {
-            ref.removeEventListener('mouseup', handleElementMouseUp, true)
-            ref.removeEventListener('click', handleElementMouseUp, true)
+            el.removeEventListener('mouseup', handleElementMouseUp, true)
+            el.removeEventListener('click', handleElementMouseUp, true)
         }, 0)
     }
 

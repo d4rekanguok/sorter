@@ -6,6 +6,7 @@
     import { defaultStrategies } from './strategies'
     import { isOverlapped } from './intersect'
     import { scroll } from './autoScroll'
+    import { visualize } from './dom-visualize'
 
     import DragItem from './DragItem.svelte'
     import DragIndicator from './DragIndicator.svelte'
@@ -17,6 +18,7 @@
     export let debug = false
     export let data = []
     export let selected = []
+    export let idFieldName = 'id'
     let className = ''
     export { className as class }
     export let strategy = 'vertical'
@@ -82,7 +84,7 @@
     $: {
         let selectedIndex = new Set()
         selected.forEach((itemId) => {
-            const index = data.findIndex((item) => item.id === itemId)
+            const index = data.findIndex((item) => item[idFieldName] === itemId)
             selectedIndex.add(index)
         })
         $store.selectedIds = selectedIndex
@@ -117,9 +119,13 @@
     }
 
     const recalculateDimensions = () => {
+        console.log('recalculateDimensions')
         const rect = ref.getBoundingClientRect()
         const visibleRect = getVisibleRect(ref, rect)
         const { itemDimension } = $store
+        if (debug) {
+            visualize(visibleRect)
+        }
         $store.wd = rect
         $store.visibleRect = visibleRect
         $store.visibleIdRange = checkVisibility({
@@ -173,7 +179,7 @@ visiblerange: {$store.visibleIdRange.join(' -> ')}
     class="inner-wrapper {className}"
     style="width: {maxDimension[0]}px; height: {maxDimension[1]}px;"
 >
-    {#each data as item, index (item.id)}
+    {#each data as item, index (item[idFieldName])}
         {#if shouldRender(index, $store)}
             <DragItem {index}>
                 <slot

@@ -1,4 +1,4 @@
-import { intersect } from '$lib/intersect'
+import { intersect } from './intersect'
 
 /**
  * Get visible rect

@@ -8,7 +8,7 @@
     "preview": "svelte-kit preview",
     "test:file": "node",
     "package": "svelte-kit package && yalc push ./package",
-    "pub": "npm publish ./package/",
+    "pub": "sudo npm publish ./package/",
     "lint": "prettier --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier --write --plugin-search-dir=. ."
   },
