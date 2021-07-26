@@ -119,7 +119,6 @@
     }
 
     const recalculateDimensions = () => {
-        console.log('recalculateDimensions')
         const rect = ref.getBoundingClientRect()
         const visibleRect = getVisibleRect(ref, rect)
         const { itemDimension } = $store

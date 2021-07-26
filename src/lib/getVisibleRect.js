@@ -14,12 +14,15 @@ export const getVisibleRect = (el, visibleRect) => {
   const rect = visibleRect || el.getBoundingClientRect()
   const parentEl = el.parentElement
 
-  let nextVisibleRect
+  let nextVisibleRect = rect
   if (parentEl === document.body) {
     nextVisibleRect = intersect(rect, new DOMRect(0, 0, window.innerWidth, window.innerHeight))
   } else {
-    const parentRect = parentEl.getBoundingClientRect()
-    nextVisibleRect = intersect(rect, parentRect)
+    const position = getComputedStyle(parentEl).getPropertyValue('position')
+    if (!['absolute', 'fixed'].includes(position)) {
+      const parentRect = parentEl.getBoundingClientRect()
+      nextVisibleRect = intersect(rect, parentRect)
+    }
   }
 
   return getVisibleRect(parentEl, nextVisibleRect)
