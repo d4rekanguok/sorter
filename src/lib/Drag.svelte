@@ -1,5 +1,10 @@
 <script>
-    import { setContext, onMount, createEventDispatcher } from 'svelte'
+    import {
+        setContext,
+        onMount,
+        createEventDispatcher,
+        afterUpdate,
+    } from 'svelte'
     import { derived } from 'svelte/store'
     import { key, createStore, DragStates } from './context'
     import { getVisibleRect } from './getVisibleRect'
@@ -69,7 +74,6 @@
             size: data.length,
             templateDimension: itemDimension,
         })
-        // scrollPos.setScrollBound([0, 0, maxDimension[0], maxDimension[1]])
     }
 
     setContext(key, {
@@ -93,7 +97,7 @@
 
     $: detectAutoScroll($store)
 
-    onMount(() => {
+    afterUpdate(() => {
         recalculateDimensions()
         $store.originWd = {
             top: $store.wd.top + window.scrollY,
@@ -120,6 +124,7 @@
     }
 
     const recalculateDimensions = () => {
+        if (!ref) return
         const rect = ref.getBoundingClientRect()
         const visibleRect = getVisibleRect(ref, rect)
         const { itemDimension } = $store

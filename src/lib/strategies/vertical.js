@@ -24,8 +24,6 @@ const unplace = ({
     /* -1 because most of the time the visible element is half way cutoff */
     const max = Math.min(visibleIdRange[1] - MARGIN - 1, length)
 
-    console.log(min, max)
-
     const i = Math.round(y / h)
     return Math.max(min, Math.min(max, i))
 }
