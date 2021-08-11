@@ -1,5 +1,7 @@
 import { createStrategy } from '../createStrategy'
 
+const MARGIN = 2
+
 /** @type {Drag.Strategy['place']} */
 const place = ({ index, dimension }) => {
     const h = dimension[1]
@@ -13,18 +15,19 @@ const unplace = ({
     dimension,
     containerDimension,
     length,
+    visibleIdRange = [0, Infinity],
 }) => {
     const y = position[1] - containerDimension.top
     const h = dimension[1]
 
-    const start = Math.max(Math.ceil(y / h), 0)
-    const end = Math.min(
-        length,
-        Math.floor((y + containerDimension.height) / h)
-    )
+    const min = Math.max(visibleIdRange[0] + MARGIN, 0)
+    /* -1 because most of the time the visible element is half way cutoff */
+    const max = Math.min(visibleIdRange[1] - MARGIN - 1, length)
+
+    console.log(min, max)
 
     const i = Math.round(y / h)
-    return Math.max(start, Math.min(end, i))
+    return Math.max(min, Math.min(max, i))
 }
 
 /** @type {Drag.Strategy['getContainerMaxDimension']} */
@@ -58,12 +61,11 @@ const getAutoScrollZone = ({ pos, visibleRect, isOverlapped }) => {
 
 /** @type {Drag.Strategy['checkVisibility']} */
 const checkVisibility = ({ itemDimension, wd, visibleRect }) => {
-    const margin = 2
     const startY = visibleRect.y - wd.y
     const endY = startY + visibleRect.height
     const itemHeight = itemDimension[1]
-    const startId = Math.floor(startY / itemHeight) - margin
-    const endId = Math.ceil(endY / itemHeight) + margin
+    const startId = Math.floor(startY / itemHeight) - MARGIN
+    const endId = Math.ceil(endY / itemHeight) + MARGIN
     return [startId, endId]
 }
 

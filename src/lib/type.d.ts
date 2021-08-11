@@ -23,6 +23,7 @@ declare namespace Drag {
         containerDimension: DOMRect
         scrollPosition: Point
         length: number
+        visibleIdRange?: [number, number]
     }
 
     interface PlaceArgs {

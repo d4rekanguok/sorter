@@ -79,7 +79,6 @@
     <button on:click={handleChangeSize}>Change Size</button>
     <div class="wrapper" bind:this={scrollWrapperRef}>
         <Drag
-            debug={true}
             strategy="horizontal"
             {scrollWrapperRef}
             {data}

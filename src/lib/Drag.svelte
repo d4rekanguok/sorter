@@ -47,6 +47,7 @@
                   dimension: _store.itemDimension,
                   containerDimension: _store.wd,
                   length: data.length,
+                  visibleIdRange: _store.visibleIdRange,
               })
             : null
     })

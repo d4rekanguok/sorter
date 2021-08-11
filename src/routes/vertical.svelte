@@ -78,32 +78,34 @@
       </pre> -->
     </div>
 
-    <div class="wrapper" bind:this={scrollWrapperRef}>
-        <h2>Horizontal</h2>
-        <button on:click={handleChangeSize}>Change Size</button>
-        <Drag
-            debug={true}
-            strategy="vertical"
-            {scrollWrapperRef}
-            {data}
-            {selected}
-            itemDimension={itemDimensions[itemDimensionId]}
-            on:dragend={handleDragEnd}
-            let:item
-            let:index
-            let:isDragging
-        >
-            <TemplateClick
-                slot="item"
-                {item}
-                {index}
-                {isDragging}
-                isSelected={selected.has(index)}
-                on:select={handleSelect}
-                on:add={handleAdd}
-            />
-        </Drag>
-        <button class="add" on:click={handleAdd}>More</button>
+    <div class="wrapper2">
+        <div class="wrapper" bind:this={scrollWrapperRef}>
+            <h2>Horizontal</h2>
+            <button on:click={handleChangeSize}>Change Size</button>
+            <Drag
+                debug={true}
+                strategy="vertical"
+                {scrollWrapperRef}
+                {data}
+                {selected}
+                itemDimension={itemDimensions[itemDimensionId]}
+                on:dragend={handleDragEnd}
+                let:item
+                let:index
+                let:isDragging
+            >
+                <TemplateClick
+                    slot="item"
+                    {item}
+                    {index}
+                    {isDragging}
+                    isSelected={selected.has(index)}
+                    on:select={handleSelect}
+                    on:add={handleAdd}
+                />
+            </Drag>
+            <button class="add" on:click={handleAdd}>More</button>
+        </div>
     </div>
 </main>
 
@@ -131,6 +133,16 @@
         width: 200px;
         border-radius: 8px;
         border: 1px solid skyblue;
+    }
+
+    .wrapper2 {
+        position: relative;
+        overflow: scroll;
+        height: 80vh;
+        width: 100%;
+        padding: 20vh 10rem;
+        border-radius: 8px;
+        border: 1px solid hotpink;
     }
 
     .add {

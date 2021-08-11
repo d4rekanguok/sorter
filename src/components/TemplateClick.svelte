@@ -23,10 +23,6 @@
     style="--color: {value};"
     data-tainted={isTainted}
     class:isDragging
-    on:click={() => {
-        console.log('element clicked')
-        isTainted = !isTainted
-    }}
 >
     <div>{index + 1} {value}</div>
     <input type="checkbox" checked={isSelected} on:change={changeHandler} />
