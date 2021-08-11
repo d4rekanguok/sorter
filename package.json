@@ -1,7 +1,7 @@
 {
   "name": "svelte-drag-sorter",
   "type": "module",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "scripts": {
     "dev": "svelte-kit dev -p 8889",
     "build": "svelte-kit build",
