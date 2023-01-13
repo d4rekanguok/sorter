@@ -160,6 +160,10 @@
         }
     }
 
+    const handleStart = () => {
+        $store.wrapperScrollPos = [scrollWrapperRef.scrollLeft, scrollWrapperRef.scrollTop]
+    }
+
     store.on('dragging', () => recalculateDimensions())
 </script>
 
@@ -186,7 +190,7 @@ visiblerange: {$store.visibleIdRange.join(' -> ')}
 >
     {#each data as item, index (item[idFieldName])}
         {#if shouldRender(index, $store)}
-            <DragItem {index}>
+            <DragItem {index} on:start={handleStart}>
                 <slot
                     name="item"
                     {item}
