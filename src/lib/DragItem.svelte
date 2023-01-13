@@ -1,10 +1,12 @@
 <script>
-    import { getContext } from 'svelte'
+    import { getContext, createEventDispatcher } from 'svelte'
     import { spring } from 'svelte/motion'
     import { key, DragStates } from './context'
 
     export let index
     export let draggable = true
+
+    const dispatch = createEventDispatcher()
 
     /** @type {number} temporary index while in drag state */
     let nextIndex = index
@@ -39,8 +41,8 @@
 
         if ($store.dragIds.has(index)) {
             const i = Array.from($store.dragIds)
-                .sort((a, b) => a - b)
-                .indexOf(index)
+            .sort((a, b) => a - b)
+            .indexOf(index)
 
             if (isMainDragger) {
                 $store.draggingPos = getPos(
@@ -71,7 +73,7 @@
     }
 
     $: {
-        const { dragIds, wd, originWd } = $store
+        const { dragIds, wd, originWd, wrapperScrollPos } = $store
         isDragging = dragIds.has(index)
         let dx = 0
         let dy = 0
@@ -79,6 +81,11 @@
         if (wd && originWd) {
             dx = wd.left - originWd.left
             dy = wd.top - originWd.top
+        }
+
+        if (wrapperScrollPos) {
+            dx -= wrapperScrollPos[0]
+            dy -= wrapperScrollPos[1]
         }
 
         posX = isDragging ? $pos[0] + dx : $pos[0]
@@ -112,6 +119,7 @@
 
             await promise
 
+            dispatch('start')
             const { clientX, clientY } = e
             store.transit(DragStates.dragging, {
                 dragId: index,
